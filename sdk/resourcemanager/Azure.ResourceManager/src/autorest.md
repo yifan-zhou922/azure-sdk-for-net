@@ -104,8 +104,6 @@ list-exception:
   - /{linkId}
   - /{resourceId}
 request-path-to-resource-data:
-  # model of ResourceLink has id, type and name, but its type has the type of `object` instead of `string`
-  /{linkId}: ResourceLink
   # subscription does not have name and type
   /subscriptions/{subscriptionId}: Subscription
   # tenant does not have name and type
