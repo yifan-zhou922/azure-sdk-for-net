@@ -5,10 +5,10 @@
 
 #nullable disable
 
-namespace Azure.ResourceManager.Dns.Models
+namespace DnsManagementClient.Models
 {
     /// <summary> The RecordType. </summary>
-    public enum RecordType
+    internal enum RecordType
     {
         /// <summary> A. </summary>
         A,

@@ -10,7 +10,7 @@ using Azure.Core;
 
 namespace Azure.ResourceManager.EventHubs.Models
 {
-    public partial class Sku : IUtf8JsonSerializable
+    public partial class EventHubsSku : IUtf8JsonSerializable
     {
         void IUtf8JsonSerializable.Write(Utf8JsonWriter writer)
         {
@@ -30,7 +30,7 @@ namespace Azure.ResourceManager.EventHubs.Models
             writer.WriteEndObject();
         }
 
-        internal static Sku DeserializeSku(JsonElement element)
+        internal static EventHubsSku DeserializeEventHubsSku(JsonElement element)
         {
             SkuName name = default;
             Optional<SkuTier> tier = default;
@@ -63,7 +63,7 @@ namespace Azure.ResourceManager.EventHubs.Models
                     continue;
                 }
             }
-            return new Sku(name, Optional.ToNullable(tier), Optional.ToNullable(capacity));
+            return new EventHubsSku(name, Optional.ToNullable(tier), Optional.ToNullable(capacity));
         }
     }
 }

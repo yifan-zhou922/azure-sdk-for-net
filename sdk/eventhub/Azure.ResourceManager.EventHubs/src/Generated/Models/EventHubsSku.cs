@@ -8,20 +8,20 @@
 namespace Azure.ResourceManager.EventHubs.Models
 {
     /// <summary> SKU parameters supplied to the create namespace operation. </summary>
-    public partial class Sku
+    public partial class EventHubsSku
     {
-        /// <summary> Initializes a new instance of Sku. </summary>
+        /// <summary> Initializes a new instance of EventHubsSku. </summary>
         /// <param name="name"> Name of this SKU. </param>
-        public Sku(SkuName name)
+        public EventHubsSku(SkuName name)
         {
             Name = name;
         }
 
-        /// <summary> Initializes a new instance of Sku. </summary>
+        /// <summary> Initializes a new instance of EventHubsSku. </summary>
         /// <param name="name"> Name of this SKU. </param>
         /// <param name="tier"> The billing tier of this particular SKU. </param>
         /// <param name="capacity"> The Event Hubs throughput units for Basic or Standard tiers, where value should be 0 to 20 throughput units. The Event Hubs premium units for Premium tier, where value should be 0 to 10 premium units. </param>
-        internal Sku(SkuName name, SkuTier? tier, int? capacity)
+        internal EventHubsSku(SkuName name, SkuTier? tier, int? capacity)
         {
             Name = name;
             Tier = tier;

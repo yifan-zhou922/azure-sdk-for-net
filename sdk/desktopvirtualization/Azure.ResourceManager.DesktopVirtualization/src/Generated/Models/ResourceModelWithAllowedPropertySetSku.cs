@@ -10,7 +10,7 @@ using System;
 namespace Azure.ResourceManager.DesktopVirtualization.Models
 {
     /// <summary> The ResourceModelWithAllowedPropertySetSku. </summary>
-    public partial class ResourceModelWithAllowedPropertySetSku : Sku
+    public partial class ResourceModelWithAllowedPropertySetSku : DesktopVirtualizationSku
     {
         /// <summary> Initializes a new instance of ResourceModelWithAllowedPropertySetSku. </summary>
         /// <param name="name"> The name of the SKU. Ex - P3. It is typically a letter+number code. </param>

@@ -10,7 +10,7 @@ using Azure.Core;
 
 namespace Azure.ResourceManager.DesktopVirtualization.Models
 {
-    public partial class Sku : IUtf8JsonSerializable
+    public partial class DesktopVirtualizationSku : IUtf8JsonSerializable
     {
         void IUtf8JsonSerializable.Write(Utf8JsonWriter writer)
         {
@@ -40,7 +40,7 @@ namespace Azure.ResourceManager.DesktopVirtualization.Models
             writer.WriteEndObject();
         }
 
-        internal static Sku DeserializeSku(JsonElement element)
+        internal static DesktopVirtualizationSku DeserializeDesktopVirtualizationSku(JsonElement element)
         {
             string name = default;
             Optional<SkuTier> tier = default;
@@ -85,7 +85,7 @@ namespace Azure.ResourceManager.DesktopVirtualization.Models
                     continue;
                 }
             }
-            return new Sku(name, Optional.ToNullable(tier), size.Value, family.Value, Optional.ToNullable(capacity));
+            return new DesktopVirtualizationSku(name, Optional.ToNullable(tier), size.Value, family.Value, Optional.ToNullable(capacity));
         }
     }
 }
