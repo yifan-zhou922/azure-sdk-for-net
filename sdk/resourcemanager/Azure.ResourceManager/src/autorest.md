@@ -404,7 +404,9 @@ directive:
     transform: $["x-ms-client-name"] = "ManagementLock"
   - from: links.json
     where: $.definitions.ResourceLink.properties.type
-    transform: $["x-ms-client-name"] = "ResourceLinkType"
+    transform: >
+      $["x-ms-client-name"] = "ResourceType";
+      $["type"] = "string";
 ```
 
 ### Tag: package-management
@@ -441,6 +443,10 @@ directive:
   - rename-model:
       from: CreateParentGroupInfo
       to: ManagementGroupParentCreateOptions
+  - from: management.json
+    where: $.definitions.CheckNameAvailabilityRequest.properties.type
+    transform: >
+      $['x-ms-client-name'] = "ResourceType"
   - rename-model:
       from: CheckNameAvailabilityRequest
       to: CheckNameAvailabilityOptions

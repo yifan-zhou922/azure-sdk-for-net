@@ -11,14 +11,14 @@ namespace Azure.ResourceManager.Models
     /// <summary>
     /// A class representing SKU for resource.
     /// </summary>
-    public sealed partial class Sku : IEquatable<Sku>
+    public sealed partial class ArmSku : IEquatable<ArmSku>
     {
         /// <summary>
-        /// Compares this <see cref="Sku"/> instance with another object and determines if they are equals.
+        /// Compares this <see cref="ArmSku"/> instance with another object and determines if they are equals.
         /// </summary>
-        /// <param name="other"> <see cref="Sku"/> object to compare. </param>
+        /// <param name="other"> <see cref="ArmSku"/> object to compare. </param>
         /// <returns> True if they are equals, otherwise false. </returns>
-        public bool Equals(Sku other)
+        public bool Equals(ArmSku other)
         {
             if (other == null)
                 return false;
@@ -47,7 +47,7 @@ namespace Azure.ResourceManager.Models
                 return false;
             }
 
-            if (obj is not Sku other)
+            if (obj is not ArmSku other)
                 return false;
 
             return Equals(other);
@@ -66,12 +66,12 @@ namespace Azure.ResourceManager.Models
         }
 
         /// <summary>
-        /// Compares this <see cref="Sku"/> instance with another object and determines if they are equals.
+        /// Compares this <see cref="ArmSku"/> instance with another object and determines if they are equals.
         /// </summary>
         /// <param name="left"> The sku on the left side of the operator. </param>
         /// <param name="right"> The sku on the right side of the operator. </param>
         /// <returns> True if they are equal, otherwise false. </returns>
-        public static bool operator ==(Sku left, Sku right)
+        public static bool operator ==(ArmSku left, ArmSku right)
         {
             if (ReferenceEquals(left, null))
             {
@@ -82,12 +82,12 @@ namespace Azure.ResourceManager.Models
         }
 
         /// <summary>
-        /// Compares this <see cref="Sku"/> instance with another object and determines if they are not equal.
+        /// Compares this <see cref="ArmSku"/> instance with another object and determines if they are not equal.
         /// </summary>
         /// <param name="left"> The sku on the left side of the operator. </param>
         /// <param name="right"> The sku on the right side of the operator. </param>
         /// <returns> True if they are not equal, otherwise false. </returns>
-        public static bool operator !=(Sku left, Sku right)
+        public static bool operator !=(ArmSku left, ArmSku right)
         {
             return !(left == right);
         }

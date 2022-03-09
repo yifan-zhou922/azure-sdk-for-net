@@ -5,25 +5,25 @@
 
 #nullable disable
 
-using System;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using Azure.Core;
 
-namespace Azure.ResourceManager.Models
+namespace Azure.ResourceManager.Resources.Models
 {
-    [JsonConverter(typeof(SkuConverter))]
-    public partial class Sku : IUtf8JsonSerializable
+    public partial class ResourcesSku : IUtf8JsonSerializable
     {
         void IUtf8JsonSerializable.Write(Utf8JsonWriter writer)
         {
             writer.WriteStartObject();
-            writer.WritePropertyName("name");
-            writer.WriteStringValue(Name);
+            if (Optional.IsDefined(Name))
+            {
+                writer.WritePropertyName("name");
+                writer.WriteStringValue(Name);
+            }
             if (Optional.IsDefined(Tier))
             {
                 writer.WritePropertyName("tier");
-                writer.WriteStringValue(Tier.Value.ToSerialString());
+                writer.WriteStringValue(Tier);
             }
             if (Optional.IsDefined(Size))
             {
@@ -35,6 +35,11 @@ namespace Azure.ResourceManager.Models
                 writer.WritePropertyName("family");
                 writer.WriteStringValue(Family);
             }
+            if (Optional.IsDefined(Model))
+            {
+                writer.WritePropertyName("model");
+                writer.WriteStringValue(Model);
+            }
             if (Optional.IsDefined(Capacity))
             {
                 writer.WritePropertyName("capacity");
@@ -43,12 +48,13 @@ namespace Azure.ResourceManager.Models
             writer.WriteEndObject();
         }
 
-        internal static Sku DeserializeSku(JsonElement element)
+        internal static ResourcesSku DeserializeResourcesSku(JsonElement element)
         {
-            string name = default;
-            Optional<SkuTier> tier = default;
+            Optional<string> name = default;
+            Optional<string> tier = default;
             Optional<string> size = default;
             Optional<string> family = default;
+            Optional<string> model = default;
             Optional<int> capacity = default;
             foreach (var property in element.EnumerateObject())
             {
@@ -59,12 +65,7 @@ namespace Azure.ResourceManager.Models
                 }
                 if (property.NameEquals("tier"))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
-                    {
-                        property.ThrowNonNullablePropertyIsNull();
-                        continue;
-                    }
-                    tier = property.Value.GetString().ToSkuTier();
+                    tier = property.Value.GetString();
                     continue;
                 }
                 if (property.NameEquals("size"))
@@ -75,6 +76,11 @@ namespace Azure.ResourceManager.Models
                 if (property.NameEquals("family"))
                 {
                     family = property.Value.GetString();
+                    continue;
+                }
+                if (property.NameEquals("model"))
+                {
+                    model = property.Value.GetString();
                     continue;
                 }
                 if (property.NameEquals("capacity"))
@@ -88,20 +94,7 @@ namespace Azure.ResourceManager.Models
                     continue;
                 }
             }
-            return new Sku(name, Optional.ToNullable(tier), size.Value, family.Value, Optional.ToNullable(capacity));
-        }
-
-        internal partial class SkuConverter : JsonConverter<Sku>
-        {
-            public override void Write(Utf8JsonWriter writer, Sku model, JsonSerializerOptions options)
-            {
-                writer.WriteObjectValue(model);
-            }
-            public override Sku Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-            {
-                using var document = JsonDocument.ParseValue(ref reader);
-                return DeserializeSku(document.RootElement);
-            }
+            return new ResourcesSku(name.Value, tier.Value, size.Value, family.Value, model.Value, Optional.ToNullable(capacity));
         }
     }
 }

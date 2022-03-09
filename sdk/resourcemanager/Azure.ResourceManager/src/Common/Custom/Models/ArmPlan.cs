@@ -11,14 +11,14 @@ namespace Azure.ResourceManager.Models
     /// <summary>
     /// Representation of a publisher plan for marketplace RPs.
     /// </summary>
-    public sealed partial class Plan : IEquatable<Plan>
+    public sealed partial class ArmPlan : IEquatable<ArmPlan>
     {
         /// <summary>
-        /// Compares this <see cref="Plan"/> instance with another object and determines if they are equals.
+        /// Compares this <see cref="ArmPlan"/> instance with another object and determines if they are equals.
         /// </summary>
-        /// <param name="other"> <see cref="Plan"/> object to compare. </param>
+        /// <param name="other"> <see cref="ArmPlan"/> object to compare. </param>
         /// <returns> True if they are equals, otherwise false. </returns>
-        public bool Equals(Plan other)
+        public bool Equals(ArmPlan other)
         {
             if (ReferenceEquals(other, null))
                 return false;
@@ -47,7 +47,7 @@ namespace Azure.ResourceManager.Models
                 return false;
             }
 
-            if (obj is not Plan other)
+            if (obj is not ArmPlan other)
                 return false;
 
             return Equals(other);
@@ -66,12 +66,12 @@ namespace Azure.ResourceManager.Models
         }
 
         /// <summary>
-        /// Compares this <see cref="Plan"/> instance with another object and determines if they are equals.
+        /// Compares this <see cref="ArmPlan"/> instance with another object and determines if they are equals.
         /// </summary>
         /// <param name="left"> The object on the left side of the operator. </param>
         /// <param name="right"> The object on the right side of the operator. </param>
         /// <returns> True if they are equal, otherwise false. </returns>
-        public static bool operator ==(Plan left, Plan right)
+        public static bool operator ==(ArmPlan left, ArmPlan right)
         {
             if (ReferenceEquals(left, null))
             {
@@ -82,12 +82,12 @@ namespace Azure.ResourceManager.Models
         }
 
         /// <summary>
-        /// Compares this <see cref="Plan"/> instance with another object and determines if they are equals.
+        /// Compares this <see cref="ArmPlan"/> instance with another object and determines if they are equals.
         /// </summary>
         /// <param name="left"> The object on the left side of the operator. </param>
         /// <param name="right"> The object on the right side of the operator. </param>
         /// <returns> True if they are not equal, otherwise false. </returns>
-        public static bool operator !=(Plan left, Plan right)
+        public static bool operator !=(ArmPlan left, ArmPlan right)
         {
             return !(left == right);
         }

@@ -12,8 +12,8 @@ using Azure.Core;
 
 namespace Azure.ResourceManager.Models
 {
-    [JsonConverter(typeof(PlanConverter))]
-    public partial class Plan : IUtf8JsonSerializable
+    [JsonConverter(typeof(ArmPlanConverter))]
+    public partial class ArmPlan : IUtf8JsonSerializable
     {
         void IUtf8JsonSerializable.Write(Utf8JsonWriter writer)
         {
@@ -37,7 +37,7 @@ namespace Azure.ResourceManager.Models
             writer.WriteEndObject();
         }
 
-        internal static Plan DeserializePlan(JsonElement element)
+        internal static ArmPlan DeserializeArmPlan(JsonElement element)
         {
             string name = default;
             string publisher = default;
@@ -72,19 +72,19 @@ namespace Azure.ResourceManager.Models
                     continue;
                 }
             }
-            return new Plan(name, publisher, product, promotionCode.Value, version.Value);
+            return new ArmPlan(name, publisher, product, promotionCode.Value, version.Value);
         }
 
-        internal partial class PlanConverter : JsonConverter<Plan>
+        internal partial class ArmPlanConverter : JsonConverter<ArmPlan>
         {
-            public override void Write(Utf8JsonWriter writer, Plan model, JsonSerializerOptions options)
+            public override void Write(Utf8JsonWriter writer, ArmPlan model, JsonSerializerOptions options)
             {
                 writer.WriteObjectValue(model);
             }
-            public override Plan Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+            public override ArmPlan Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
             {
                 using var document = JsonDocument.ParseValue(ref reader);
-                return DeserializePlan(document.RootElement);
+                return DeserializeArmPlan(document.RootElement);
             }
         }
     }
