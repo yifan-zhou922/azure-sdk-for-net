@@ -256,10 +256,10 @@ namespace Azure.ResourceManager.Cdn
         /// Operation Id: AfdOriginGroups_ListResourceUsage
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> An async collection of <see cref="Usage" /> that may take multiple service requests to iterate over. </returns>
-        public virtual AsyncPageable<Usage> GetResourceUsageAsync(CancellationToken cancellationToken = default)
+        /// <returns> An async collection of <see cref="CdnUsage" /> that may take multiple service requests to iterate over. </returns>
+        public virtual AsyncPageable<CdnUsage> GetResourceUsageAsync(CancellationToken cancellationToken = default)
         {
-            async Task<Page<Usage>> FirstPageFunc(int? pageSizeHint)
+            async Task<Page<CdnUsage>> FirstPageFunc(int? pageSizeHint)
             {
                 using var scope = _afdOriginGroupClientDiagnostics.CreateScope("AfdOriginGroup.GetResourceUsage");
                 scope.Start();
@@ -274,7 +274,7 @@ namespace Azure.ResourceManager.Cdn
                     throw;
                 }
             }
-            async Task<Page<Usage>> NextPageFunc(string nextLink, int? pageSizeHint)
+            async Task<Page<CdnUsage>> NextPageFunc(string nextLink, int? pageSizeHint)
             {
                 using var scope = _afdOriginGroupClientDiagnostics.CreateScope("AfdOriginGroup.GetResourceUsage");
                 scope.Start();
@@ -298,10 +298,10 @@ namespace Azure.ResourceManager.Cdn
         /// Operation Id: AfdOriginGroups_ListResourceUsage
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> A collection of <see cref="Usage" /> that may take multiple service requests to iterate over. </returns>
-        public virtual Pageable<Usage> GetResourceUsage(CancellationToken cancellationToken = default)
+        /// <returns> A collection of <see cref="CdnUsage" /> that may take multiple service requests to iterate over. </returns>
+        public virtual Pageable<CdnUsage> GetResourceUsage(CancellationToken cancellationToken = default)
         {
-            Page<Usage> FirstPageFunc(int? pageSizeHint)
+            Page<CdnUsage> FirstPageFunc(int? pageSizeHint)
             {
                 using var scope = _afdOriginGroupClientDiagnostics.CreateScope("AfdOriginGroup.GetResourceUsage");
                 scope.Start();
@@ -316,7 +316,7 @@ namespace Azure.ResourceManager.Cdn
                     throw;
                 }
             }
-            Page<Usage> NextPageFunc(string nextLink, int? pageSizeHint)
+            Page<CdnUsage> NextPageFunc(string nextLink, int? pageSizeHint)
             {
                 using var scope = _afdOriginGroupClientDiagnostics.CreateScope("AfdOriginGroup.GetResourceUsage");
                 scope.Start();

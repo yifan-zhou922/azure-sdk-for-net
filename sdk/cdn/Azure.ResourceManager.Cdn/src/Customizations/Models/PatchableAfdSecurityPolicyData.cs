@@ -10,12 +10,23 @@ namespace Azure.ResourceManager.Cdn.Models
     /// <summary> The json object that contains properties required to create a security policy. </summary>
     public partial class PatchableAfdSecurityPolicyData : AfdStateProperties
     {
-        /// <summary> Initializes a new instance of AfdSecurityPolicyUpdateOptions. </summary>
+        /// <summary> Initializes a new instance of PatchableAfdSecurityPolicyData. </summary>
         public PatchableAfdSecurityPolicyData()
         {
         }
 
         /// <summary> object which contains security policy parameters. </summary>
-        public SecurityPolicyParameters Parameters { get; set; }
+        internal SecurityPolicyParameters Parameters { get; set; }
+        /// <summary> The type of the Security policy to create. </summary>
+        internal SecurityPolicyType ParametersSecurityPolicyType
+        {
+            get => Parameters is null ? default : Parameters.SecurityPolicyType;
+            set
+            {
+                if (Parameters is null)
+                    Parameters = new SecurityPolicyParameters();
+                Parameters.SecurityPolicyType = value;
+            }
+        }
     }
 }
