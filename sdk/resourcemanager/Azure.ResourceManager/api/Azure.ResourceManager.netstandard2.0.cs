@@ -338,7 +338,7 @@ namespace Azure.ResourceManager.Models
         public string Family { get { throw null; } set { } }
         public string Name { get { throw null; } set { } }
         public string Size { get { throw null; } set { } }
-        public Azure.ResourceManager.Models.SkuTier? Tier { get { throw null; } set { } }
+        public Azure.ResourceManager.Models.ArmSkuTier? Tier { get { throw null; } set { } }
         public bool Equals(Azure.ResourceManager.Models.ArmSku other) { throw null; }
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
         public override bool Equals(object obj) { throw null; }
@@ -346,6 +346,13 @@ namespace Azure.ResourceManager.Models
         public override int GetHashCode() { throw null; }
         public static bool operator ==(Azure.ResourceManager.Models.ArmSku left, Azure.ResourceManager.Models.ArmSku right) { throw null; }
         public static bool operator !=(Azure.ResourceManager.Models.ArmSku left, Azure.ResourceManager.Models.ArmSku right) { throw null; }
+    }
+    public enum ArmSkuTier
+    {
+        Free = 0,
+        Basic = 1,
+        Standard = 2,
+        Premium = 3,
     }
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public readonly partial struct CreatedByType : System.IEquatable<Azure.ResourceManager.Models.CreatedByType>
@@ -433,13 +440,6 @@ namespace Azure.ResourceManager.Models
         public string Name { get { throw null; } }
         public Azure.Core.ResourceType ResourceType { get { throw null; } }
         public Azure.ResourceManager.Models.SystemData SystemData { get { throw null; } }
-    }
-    public enum SkuTier
-    {
-        Free = 0,
-        Basic = 1,
-        Standard = 2,
-        Premium = 3,
     }
     public partial class SystemAssignedServiceIdentity
     {

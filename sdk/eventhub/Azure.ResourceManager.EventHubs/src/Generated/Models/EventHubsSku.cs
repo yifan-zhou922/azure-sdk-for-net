@@ -12,7 +12,7 @@ namespace Azure.ResourceManager.EventHubs.Models
     {
         /// <summary> Initializes a new instance of EventHubsSku. </summary>
         /// <param name="name"> Name of this SKU. </param>
-        public EventHubsSku(SkuName name)
+        public EventHubsSku(EventHubsSkuName name)
         {
             Name = name;
         }
@@ -21,7 +21,7 @@ namespace Azure.ResourceManager.EventHubs.Models
         /// <param name="name"> Name of this SKU. </param>
         /// <param name="tier"> The billing tier of this particular SKU. </param>
         /// <param name="capacity"> The Event Hubs throughput units for Basic or Standard tiers, where value should be 0 to 20 throughput units. The Event Hubs premium units for Premium tier, where value should be 0 to 10 premium units. </param>
-        internal EventHubsSku(SkuName name, SkuTier? tier, int? capacity)
+        internal EventHubsSku(EventHubsSkuName name, EventHubsSkuTier? tier, int? capacity)
         {
             Name = name;
             Tier = tier;
@@ -29,9 +29,9 @@ namespace Azure.ResourceManager.EventHubs.Models
         }
 
         /// <summary> Name of this SKU. </summary>
-        public SkuName Name { get; set; }
+        public EventHubsSkuName Name { get; set; }
         /// <summary> The billing tier of this particular SKU. </summary>
-        public SkuTier? Tier { get; set; }
+        public EventHubsSkuTier? Tier { get; set; }
         /// <summary> The Event Hubs throughput units for Basic or Standard tiers, where value should be 0 to 20 throughput units. The Event Hubs premium units for Premium tier, where value should be 0 to 10 premium units. </summary>
         public int? Capacity { get; set; }
     }

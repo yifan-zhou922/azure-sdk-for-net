@@ -17,12 +17,12 @@ namespace Azure.ResourceManager.Cdn.Models
 
         /// <summary> Initializes a new instance of CdnSku. </summary>
         /// <param name="name"> Name of the pricing tier. </param>
-        internal CdnSku(SkuName? name)
+        internal CdnSku(CdnSkuName? name)
         {
             Name = name;
         }
 
         /// <summary> Name of the pricing tier. </summary>
-        public SkuName? Name { get; set; }
+        public CdnSkuName? Name { get; set; }
     }
 }

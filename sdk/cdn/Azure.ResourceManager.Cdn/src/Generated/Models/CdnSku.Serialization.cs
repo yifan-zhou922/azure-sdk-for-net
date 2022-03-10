@@ -25,7 +25,7 @@ namespace Azure.ResourceManager.Cdn.Models
 
         internal static CdnSku DeserializeCdnSku(JsonElement element)
         {
-            Optional<SkuName> name = default;
+            Optional<CdnSkuName> name = default;
             foreach (var property in element.EnumerateObject())
             {
                 if (property.NameEquals("name"))
@@ -35,7 +35,7 @@ namespace Azure.ResourceManager.Cdn.Models
                         property.ThrowNonNullablePropertyIsNull();
                         continue;
                     }
-                    name = new SkuName(property.Value.GetString());
+                    name = new CdnSkuName(property.Value.GetString());
                     continue;
                 }
             }

@@ -18,7 +18,7 @@ namespace Azure.ResourceManager.Tests
 
         private static ResourcesSku GetSku()
         {
-            return new ResourcesSku("name", SkuTier.Basic.ToString(), "size", "family", "model", 10);
+            return new ResourcesSku("name", ArmSkuTier.Basic.ToString(), "size", "family", "model", 10);
         }
 
         private static GenericResourceData GetGenericResource()

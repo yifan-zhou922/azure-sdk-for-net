@@ -29,7 +29,7 @@ namespace Azure.ResourceManager.DesktopVirtualization.Models
         /// <param name="size"> The SKU size. When the name field is the combination of tier and some other value, this would be the standalone code. </param>
         /// <param name="family"> If the service has different generations of hardware, for the same SKU, then that can be captured here. </param>
         /// <param name="capacity"> If the SKU supports scale out/in then the capacity integer should be included. If scale out/in is not possible for the resource this may be omitted. </param>
-        internal ResourceModelWithAllowedPropertySetSku(string name, SkuTier? tier, string size, string family, int? capacity) : base(name, tier, size, family, capacity)
+        internal ResourceModelWithAllowedPropertySetSku(string name, DesktopVirtualizationSkuTier? tier, string size, string family, int? capacity) : base(name, tier, size, family, capacity)
         {
         }
     }

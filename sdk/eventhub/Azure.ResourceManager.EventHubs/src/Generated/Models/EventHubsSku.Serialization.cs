@@ -32,14 +32,14 @@ namespace Azure.ResourceManager.EventHubs.Models
 
         internal static EventHubsSku DeserializeEventHubsSku(JsonElement element)
         {
-            SkuName name = default;
-            Optional<SkuTier> tier = default;
+            EventHubsSkuName name = default;
+            Optional<EventHubsSkuTier> tier = default;
             Optional<int> capacity = default;
             foreach (var property in element.EnumerateObject())
             {
                 if (property.NameEquals("name"))
                 {
-                    name = new SkuName(property.Value.GetString());
+                    name = new EventHubsSkuName(property.Value.GetString());
                     continue;
                 }
                 if (property.NameEquals("tier"))
@@ -49,7 +49,7 @@ namespace Azure.ResourceManager.EventHubs.Models
                         property.ThrowNonNullablePropertyIsNull();
                         continue;
                     }
-                    tier = new SkuTier(property.Value.GetString());
+                    tier = new EventHubsSkuTier(property.Value.GetString());
                     continue;
                 }
                 if (property.NameEquals("capacity"))

@@ -88,11 +88,11 @@ namespace Azure.ResourceManager.Tests
             Assert.AreEqual(expected, sku1.GetHashCode() == sku2.GetHashCode(), $"Hashcodes comparison was expect {expected} but was {!expected}, ({sku1.GetHashCode()}, {sku2.GetHashCode()})");
         }
 
-        [TestCase(true, SkuTier.Basic, SkuTier.Basic)]
+        [TestCase(true, ArmSkuTier.Basic, ArmSkuTier.Basic)]
         [TestCase(true, null, null)]
-        [TestCase(false, SkuTier.Basic, null)]
-        [TestCase(false, null, SkuTier.Basic)]
-        public void EqualsToTier(bool expected, SkuTier tier1, SkuTier tier2)
+        [TestCase(false, ArmSkuTier.Basic, null)]
+        [TestCase(false, null, ArmSkuTier.Basic)]
+        public void EqualsToTier(bool expected, ArmSkuTier tier1, ArmSkuTier tier2)
         {
             ArmSku sku1 = new ArmSku(null, tier1, null, null, null);
             ArmSku sku2 = new ArmSku(null, tier2, null, null, null);
@@ -150,7 +150,7 @@ namespace Azure.ResourceManager.Tests
         public void SerializationTest()
         {
             string expected = "{\"properties\":{\"name\":\"NameForSku\",\"tier\":\"Basic\",\"size\":\"SizeForSku\",\"family\":\"FamilyForSku\",\"capacity\":123456789}}";
-            ArmSku sku = new("NameForSku", SkuTier.Basic, "SizeForSku", "FamilyForSku", 123456789);
+            ArmSku sku = new("NameForSku", ArmSkuTier.Basic, "SizeForSku", "FamilyForSku", 123456789);
             var json = JsonHelper.SerializePropertiesToString(sku);
             Assert.AreEqual(expected, json);
         }
