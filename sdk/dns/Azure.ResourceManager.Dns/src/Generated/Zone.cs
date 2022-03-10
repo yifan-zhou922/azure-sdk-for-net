@@ -56,10 +56,10 @@ namespace DnsManagementClient
         {
             _zoneClientDiagnostics = new ClientDiagnostics("DnsManagementClient", ResourceType.Namespace, DiagnosticOptions);
             TryGetApiVersion(ResourceType, out string zoneApiVersion);
-            _zoneRestClient = new ZonesRestOperations(_zoneClientDiagnostics, Pipeline, DiagnosticOptions.ApplicationId, BaseUri, zoneApiVersion);
+            _zoneRestClient = new ZonesRestOperations(Pipeline, DiagnosticOptions.ApplicationId, BaseUri, zoneApiVersion);
             _recordSetClientDiagnostics = new ClientDiagnostics("DnsManagementClient", RecordSet.ResourceType.Namespace, DiagnosticOptions);
             TryGetApiVersion(RecordSet.ResourceType, out string recordSetApiVersion);
-            _recordSetRestClient = new RecordSetsRestOperations(_recordSetClientDiagnostics, Pipeline, DiagnosticOptions.ApplicationId, BaseUri, recordSetApiVersion);
+            _recordSetRestClient = new RecordSetsRestOperations(Pipeline, DiagnosticOptions.ApplicationId, BaseUri, recordSetApiVersion);
 #if DEBUG
 			ValidateResourceId(Id);
 #endif
@@ -102,7 +102,7 @@ namespace DnsManagementClient
         /// Operation Id: Zones_Get
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        public async virtual Task<Response<Zone>> GetAsync(CancellationToken cancellationToken = default)
+        public virtual async Task<Response<Zone>> GetAsync(CancellationToken cancellationToken = default)
         {
             using var scope = _zoneClientDiagnostics.CreateScope("Zone.Get");
             scope.Start();
@@ -110,7 +110,7 @@ namespace DnsManagementClient
             {
                 var response = await _zoneRestClient.GetAsync(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, cancellationToken).ConfigureAwait(false);
                 if (response.Value == null)
-                    throw await _zoneClientDiagnostics.CreateRequestFailedExceptionAsync(response.GetRawResponse()).ConfigureAwait(false);
+                    throw new RequestFailedException(response.GetRawResponse());
                 return Response.FromValue(new Zone(Client, response.Value), response.GetRawResponse());
             }
             catch (Exception e)
@@ -134,7 +134,7 @@ namespace DnsManagementClient
             {
                 var response = _zoneRestClient.Get(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, cancellationToken);
                 if (response.Value == null)
-                    throw _zoneClientDiagnostics.CreateRequestFailedException(response.GetRawResponse());
+                    throw new RequestFailedException(response.GetRawResponse());
                 return Response.FromValue(new Zone(Client, response.Value), response.GetRawResponse());
             }
             catch (Exception e)
@@ -149,10 +149,10 @@ namespace DnsManagementClient
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/dnsZones/{zoneName}
         /// Operation Id: Zones_Delete
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="ifMatch"> The etag of the DNS zone. Omit this value to always delete the current zone. Specify the last-seen etag value to prevent accidentally deleting any concurrent changes. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        public async virtual Task<ArmOperation> DeleteAsync(bool waitForCompletion, string ifMatch = null, CancellationToken cancellationToken = default)
+        public virtual async Task<ArmOperation> DeleteAsync(WaitUntil waitUntil, string ifMatch = null, CancellationToken cancellationToken = default)
         {
             using var scope = _zoneClientDiagnostics.CreateScope("Zone.Delete");
             scope.Start();
@@ -160,7 +160,7 @@ namespace DnsManagementClient
             {
                 var response = await _zoneRestClient.DeleteAsync(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, ifMatch, cancellationToken).ConfigureAwait(false);
                 var operation = new DnsManagementClientArmOperation(_zoneClientDiagnostics, Pipeline, _zoneRestClient.CreateDeleteRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, ifMatch).Request, response, OperationFinalStateVia.Location);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     await operation.WaitForCompletionResponseAsync(cancellationToken).ConfigureAwait(false);
                 return operation;
             }
@@ -176,10 +176,10 @@ namespace DnsManagementClient
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/dnsZones/{zoneName}
         /// Operation Id: Zones_Delete
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="ifMatch"> The etag of the DNS zone. Omit this value to always delete the current zone. Specify the last-seen etag value to prevent accidentally deleting any concurrent changes. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        public virtual ArmOperation Delete(bool waitForCompletion, string ifMatch = null, CancellationToken cancellationToken = default)
+        public virtual ArmOperation Delete(WaitUntil waitUntil, string ifMatch = null, CancellationToken cancellationToken = default)
         {
             using var scope = _zoneClientDiagnostics.CreateScope("Zone.Delete");
             scope.Start();
@@ -187,7 +187,7 @@ namespace DnsManagementClient
             {
                 var response = _zoneRestClient.Delete(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, ifMatch, cancellationToken);
                 var operation = new DnsManagementClientArmOperation(_zoneClientDiagnostics, Pipeline, _zoneRestClient.CreateDeleteRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, ifMatch).Request, response, OperationFinalStateVia.Location);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     operation.WaitForCompletionResponse(cancellationToken);
                 return operation;
             }
@@ -383,7 +383,7 @@ namespace DnsManagementClient
         /// <param name="value"> The value for the tag. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="key"/> or <paramref name="value"/> is null. </exception>
-        public async virtual Task<Response<Zone>> AddTagAsync(string key, string value, CancellationToken cancellationToken = default)
+        public virtual async Task<Response<Zone>> AddTagAsync(string key, string value, CancellationToken cancellationToken = default)
         {
             Argument.AssertNotNull(key, nameof(key));
             Argument.AssertNotNull(value, nameof(value));
@@ -444,7 +444,7 @@ namespace DnsManagementClient
         /// <param name="tags"> The set of tags to use as replacement. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="tags"/> is null. </exception>
-        public async virtual Task<Response<Zone>> SetTagsAsync(IDictionary<string, string> tags, CancellationToken cancellationToken = default)
+        public virtual async Task<Response<Zone>> SetTagsAsync(IDictionary<string, string> tags, CancellationToken cancellationToken = default)
         {
             Argument.AssertNotNull(tags, nameof(tags));
 
@@ -504,7 +504,7 @@ namespace DnsManagementClient
         /// <param name="key"> The key for the tag. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="key"/> is null. </exception>
-        public async virtual Task<Response<Zone>> RemoveTagAsync(string key, CancellationToken cancellationToken = default)
+        public virtual async Task<Response<Zone>> RemoveTagAsync(string key, CancellationToken cancellationToken = default)
         {
             Argument.AssertNotNull(key, nameof(key));
 

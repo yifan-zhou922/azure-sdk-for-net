@@ -161,9 +161,9 @@ namespace Azure.ResourceManager.Sql
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/jobAgents/{jobAgentName}/jobs/{jobName}
         /// Operation Id: Jobs_Delete
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        public virtual async Task<ArmOperation> DeleteAsync(bool waitForCompletion, CancellationToken cancellationToken = default)
+        public virtual async Task<ArmOperation> DeleteAsync(WaitUntil waitUntil, CancellationToken cancellationToken = default)
         {
             using var scope = _sqlJobJobsClientDiagnostics.CreateScope("SqlJob.Delete");
             scope.Start();
@@ -171,7 +171,7 @@ namespace Azure.ResourceManager.Sql
             {
                 var response = await _sqlJobJobsRestClient.DeleteAsync(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Parent.Name, Id.Parent.Name, Id.Name, cancellationToken).ConfigureAwait(false);
                 var operation = new SqlArmOperation(response);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     await operation.WaitForCompletionResponseAsync(cancellationToken).ConfigureAwait(false);
                 return operation;
             }
@@ -187,9 +187,9 @@ namespace Azure.ResourceManager.Sql
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/jobAgents/{jobAgentName}/jobs/{jobName}
         /// Operation Id: Jobs_Delete
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        public virtual ArmOperation Delete(bool waitForCompletion, CancellationToken cancellationToken = default)
+        public virtual ArmOperation Delete(WaitUntil waitUntil, CancellationToken cancellationToken = default)
         {
             using var scope = _sqlJobJobsClientDiagnostics.CreateScope("SqlJob.Delete");
             scope.Start();
@@ -197,7 +197,7 @@ namespace Azure.ResourceManager.Sql
             {
                 var response = _sqlJobJobsRestClient.Delete(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Parent.Name, Id.Parent.Name, Id.Name, cancellationToken);
                 var operation = new SqlArmOperation(response);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     operation.WaitForCompletionResponse(cancellationToken);
                 return operation;
             }
@@ -213,9 +213,9 @@ namespace Azure.ResourceManager.Sql
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/jobAgents/{jobAgentName}/jobs/{jobName}/start
         /// Operation Id: JobExecutions_Create
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        public virtual async Task<ArmOperation<ServerJobAgentJobExecution>> CreateJobExecutionAsync(bool waitForCompletion, CancellationToken cancellationToken = default)
+        public virtual async Task<ArmOperation<ServerJobAgentJobExecution>> CreateJobExecutionAsync(WaitUntil waitUntil, CancellationToken cancellationToken = default)
         {
             using var scope = _serverJobAgentJobExecutionJobExecutionsClientDiagnostics.CreateScope("SqlJob.CreateJobExecution");
             scope.Start();
@@ -223,7 +223,7 @@ namespace Azure.ResourceManager.Sql
             {
                 var response = await _serverJobAgentJobExecutionJobExecutionsRestClient.CreateAsync(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Parent.Name, Id.Parent.Name, Id.Name, cancellationToken).ConfigureAwait(false);
                 var operation = new SqlArmOperation<ServerJobAgentJobExecution>(new ServerJobAgentJobExecutionOperationSource(Client), _serverJobAgentJobExecutionJobExecutionsClientDiagnostics, Pipeline, _serverJobAgentJobExecutionJobExecutionsRestClient.CreateCreateRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Parent.Name, Id.Parent.Name, Id.Name).Request, response, OperationFinalStateVia.Location);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     await operation.WaitForCompletionAsync(cancellationToken).ConfigureAwait(false);
                 return operation;
             }
@@ -239,9 +239,9 @@ namespace Azure.ResourceManager.Sql
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/jobAgents/{jobAgentName}/jobs/{jobName}/start
         /// Operation Id: JobExecutions_Create
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        public virtual ArmOperation<ServerJobAgentJobExecution> CreateJobExecution(bool waitForCompletion, CancellationToken cancellationToken = default)
+        public virtual ArmOperation<ServerJobAgentJobExecution> CreateJobExecution(WaitUntil waitUntil, CancellationToken cancellationToken = default)
         {
             using var scope = _serverJobAgentJobExecutionJobExecutionsClientDiagnostics.CreateScope("SqlJob.CreateJobExecution");
             scope.Start();
@@ -249,7 +249,7 @@ namespace Azure.ResourceManager.Sql
             {
                 var response = _serverJobAgentJobExecutionJobExecutionsRestClient.Create(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Parent.Name, Id.Parent.Name, Id.Name, cancellationToken);
                 var operation = new SqlArmOperation<ServerJobAgentJobExecution>(new ServerJobAgentJobExecutionOperationSource(Client), _serverJobAgentJobExecutionJobExecutionsClientDiagnostics, Pipeline, _serverJobAgentJobExecutionJobExecutionsRestClient.CreateCreateRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Parent.Name, Id.Parent.Name, Id.Name).Request, response, OperationFinalStateVia.Location);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     operation.WaitForCompletion(cancellationToken);
                 return operation;
             }

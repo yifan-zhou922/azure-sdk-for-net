@@ -158,10 +158,10 @@ namespace Azure.ResourceManager.ConnectedVMwarevSphere
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ConnectedVMwarevSphere/virtualMachines/{virtualMachineName}
         /// Operation Id: VirtualMachines_Delete
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="force"> Whether force delete was specified. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        public virtual async Task<ArmOperation> DeleteAsync(bool waitForCompletion, bool? force = null, CancellationToken cancellationToken = default)
+        public virtual async Task<ArmOperation> DeleteAsync(WaitUntil waitUntil, bool? force = null, CancellationToken cancellationToken = default)
         {
             using var scope = _virtualMachineClientDiagnostics.CreateScope("VirtualMachine.Delete");
             scope.Start();
@@ -169,7 +169,7 @@ namespace Azure.ResourceManager.ConnectedVMwarevSphere
             {
                 var response = await _virtualMachineRestClient.DeleteAsync(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, force, cancellationToken).ConfigureAwait(false);
                 var operation = new ConnectedVMwarevSphereArmOperation(_virtualMachineClientDiagnostics, Pipeline, _virtualMachineRestClient.CreateDeleteRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, force).Request, response, OperationFinalStateVia.Location);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     await operation.WaitForCompletionResponseAsync(cancellationToken).ConfigureAwait(false);
                 return operation;
             }
@@ -185,10 +185,10 @@ namespace Azure.ResourceManager.ConnectedVMwarevSphere
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ConnectedVMwarevSphere/virtualMachines/{virtualMachineName}
         /// Operation Id: VirtualMachines_Delete
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="force"> Whether force delete was specified. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        public virtual ArmOperation Delete(bool waitForCompletion, bool? force = null, CancellationToken cancellationToken = default)
+        public virtual ArmOperation Delete(WaitUntil waitUntil, bool? force = null, CancellationToken cancellationToken = default)
         {
             using var scope = _virtualMachineClientDiagnostics.CreateScope("VirtualMachine.Delete");
             scope.Start();
@@ -196,7 +196,7 @@ namespace Azure.ResourceManager.ConnectedVMwarevSphere
             {
                 var response = _virtualMachineRestClient.Delete(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, force, cancellationToken);
                 var operation = new ConnectedVMwarevSphereArmOperation(_virtualMachineClientDiagnostics, Pipeline, _virtualMachineRestClient.CreateDeleteRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, force).Request, response, OperationFinalStateVia.Location);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     operation.WaitForCompletionResponse(cancellationToken);
                 return operation;
             }
@@ -212,11 +212,11 @@ namespace Azure.ResourceManager.ConnectedVMwarevSphere
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ConnectedVMwarevSphere/virtualMachines/{virtualMachineName}
         /// Operation Id: VirtualMachines_Update
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="data"> Resource properties to update. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="data"/> is null. </exception>
-        public virtual async Task<ArmOperation<VirtualMachine>> UpdateAsync(bool waitForCompletion, PatchableVirtualMachineData data, CancellationToken cancellationToken = default)
+        public virtual async Task<ArmOperation<VirtualMachine>> UpdateAsync(WaitUntil waitUntil, PatchableVirtualMachineData data, CancellationToken cancellationToken = default)
         {
             Argument.AssertNotNull(data, nameof(data));
 
@@ -226,7 +226,7 @@ namespace Azure.ResourceManager.ConnectedVMwarevSphere
             {
                 var response = await _virtualMachineRestClient.UpdateAsync(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, data, cancellationToken).ConfigureAwait(false);
                 var operation = new ConnectedVMwarevSphereArmOperation<VirtualMachine>(new VirtualMachineOperationSource(Client), _virtualMachineClientDiagnostics, Pipeline, _virtualMachineRestClient.CreateUpdateRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, data).Request, response, OperationFinalStateVia.Location);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     await operation.WaitForCompletionAsync(cancellationToken).ConfigureAwait(false);
                 return operation;
             }
@@ -242,11 +242,11 @@ namespace Azure.ResourceManager.ConnectedVMwarevSphere
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ConnectedVMwarevSphere/virtualMachines/{virtualMachineName}
         /// Operation Id: VirtualMachines_Update
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="data"> Resource properties to update. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="data"/> is null. </exception>
-        public virtual ArmOperation<VirtualMachine> Update(bool waitForCompletion, PatchableVirtualMachineData data, CancellationToken cancellationToken = default)
+        public virtual ArmOperation<VirtualMachine> Update(WaitUntil waitUntil, PatchableVirtualMachineData data, CancellationToken cancellationToken = default)
         {
             Argument.AssertNotNull(data, nameof(data));
 
@@ -256,7 +256,7 @@ namespace Azure.ResourceManager.ConnectedVMwarevSphere
             {
                 var response = _virtualMachineRestClient.Update(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, data, cancellationToken);
                 var operation = new ConnectedVMwarevSphereArmOperation<VirtualMachine>(new VirtualMachineOperationSource(Client), _virtualMachineClientDiagnostics, Pipeline, _virtualMachineRestClient.CreateUpdateRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, data).Request, response, OperationFinalStateVia.Location);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     operation.WaitForCompletion(cancellationToken);
                 return operation;
             }
@@ -272,10 +272,10 @@ namespace Azure.ResourceManager.ConnectedVMwarevSphere
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ConnectedVMwarevSphere/virtualMachines/{virtualMachineName}/stop
         /// Operation Id: VirtualMachines_Stop
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="body"> Virtualmachine stop action payload. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        public virtual async Task<ArmOperation> StopAsync(bool waitForCompletion, StopVirtualMachineOptions body = null, CancellationToken cancellationToken = default)
+        public virtual async Task<ArmOperation> StopAsync(WaitUntil waitUntil, StopVirtualMachineOptions body = null, CancellationToken cancellationToken = default)
         {
             using var scope = _virtualMachineClientDiagnostics.CreateScope("VirtualMachine.Stop");
             scope.Start();
@@ -283,7 +283,7 @@ namespace Azure.ResourceManager.ConnectedVMwarevSphere
             {
                 var response = await _virtualMachineRestClient.StopAsync(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, body, cancellationToken).ConfigureAwait(false);
                 var operation = new ConnectedVMwarevSphereArmOperation(_virtualMachineClientDiagnostics, Pipeline, _virtualMachineRestClient.CreateStopRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, body).Request, response, OperationFinalStateVia.Location);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     await operation.WaitForCompletionResponseAsync(cancellationToken).ConfigureAwait(false);
                 return operation;
             }
@@ -299,10 +299,10 @@ namespace Azure.ResourceManager.ConnectedVMwarevSphere
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ConnectedVMwarevSphere/virtualMachines/{virtualMachineName}/stop
         /// Operation Id: VirtualMachines_Stop
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="body"> Virtualmachine stop action payload. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        public virtual ArmOperation Stop(bool waitForCompletion, StopVirtualMachineOptions body = null, CancellationToken cancellationToken = default)
+        public virtual ArmOperation Stop(WaitUntil waitUntil, StopVirtualMachineOptions body = null, CancellationToken cancellationToken = default)
         {
             using var scope = _virtualMachineClientDiagnostics.CreateScope("VirtualMachine.Stop");
             scope.Start();
@@ -310,7 +310,7 @@ namespace Azure.ResourceManager.ConnectedVMwarevSphere
             {
                 var response = _virtualMachineRestClient.Stop(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, body, cancellationToken);
                 var operation = new ConnectedVMwarevSphereArmOperation(_virtualMachineClientDiagnostics, Pipeline, _virtualMachineRestClient.CreateStopRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, body).Request, response, OperationFinalStateVia.Location);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     operation.WaitForCompletionResponse(cancellationToken);
                 return operation;
             }
@@ -326,9 +326,9 @@ namespace Azure.ResourceManager.ConnectedVMwarevSphere
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ConnectedVMwarevSphere/virtualMachines/{virtualMachineName}/start
         /// Operation Id: VirtualMachines_Start
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        public virtual async Task<ArmOperation> StartAsync(bool waitForCompletion, CancellationToken cancellationToken = default)
+        public virtual async Task<ArmOperation> StartAsync(WaitUntil waitUntil, CancellationToken cancellationToken = default)
         {
             using var scope = _virtualMachineClientDiagnostics.CreateScope("VirtualMachine.Start");
             scope.Start();
@@ -336,7 +336,7 @@ namespace Azure.ResourceManager.ConnectedVMwarevSphere
             {
                 var response = await _virtualMachineRestClient.StartAsync(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, cancellationToken).ConfigureAwait(false);
                 var operation = new ConnectedVMwarevSphereArmOperation(_virtualMachineClientDiagnostics, Pipeline, _virtualMachineRestClient.CreateStartRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name).Request, response, OperationFinalStateVia.Location);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     await operation.WaitForCompletionResponseAsync(cancellationToken).ConfigureAwait(false);
                 return operation;
             }
@@ -352,9 +352,9 @@ namespace Azure.ResourceManager.ConnectedVMwarevSphere
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ConnectedVMwarevSphere/virtualMachines/{virtualMachineName}/start
         /// Operation Id: VirtualMachines_Start
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        public virtual ArmOperation Start(bool waitForCompletion, CancellationToken cancellationToken = default)
+        public virtual ArmOperation Start(WaitUntil waitUntil, CancellationToken cancellationToken = default)
         {
             using var scope = _virtualMachineClientDiagnostics.CreateScope("VirtualMachine.Start");
             scope.Start();
@@ -362,7 +362,7 @@ namespace Azure.ResourceManager.ConnectedVMwarevSphere
             {
                 var response = _virtualMachineRestClient.Start(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, cancellationToken);
                 var operation = new ConnectedVMwarevSphereArmOperation(_virtualMachineClientDiagnostics, Pipeline, _virtualMachineRestClient.CreateStartRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name).Request, response, OperationFinalStateVia.Location);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     operation.WaitForCompletionResponse(cancellationToken);
                 return operation;
             }
@@ -378,9 +378,9 @@ namespace Azure.ResourceManager.ConnectedVMwarevSphere
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ConnectedVMwarevSphere/virtualMachines/{virtualMachineName}/restart
         /// Operation Id: VirtualMachines_Restart
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        public virtual async Task<ArmOperation> RestartAsync(bool waitForCompletion, CancellationToken cancellationToken = default)
+        public virtual async Task<ArmOperation> RestartAsync(WaitUntil waitUntil, CancellationToken cancellationToken = default)
         {
             using var scope = _virtualMachineClientDiagnostics.CreateScope("VirtualMachine.Restart");
             scope.Start();
@@ -388,7 +388,7 @@ namespace Azure.ResourceManager.ConnectedVMwarevSphere
             {
                 var response = await _virtualMachineRestClient.RestartAsync(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, cancellationToken).ConfigureAwait(false);
                 var operation = new ConnectedVMwarevSphereArmOperation(_virtualMachineClientDiagnostics, Pipeline, _virtualMachineRestClient.CreateRestartRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name).Request, response, OperationFinalStateVia.Location);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     await operation.WaitForCompletionResponseAsync(cancellationToken).ConfigureAwait(false);
                 return operation;
             }
@@ -404,9 +404,9 @@ namespace Azure.ResourceManager.ConnectedVMwarevSphere
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ConnectedVMwarevSphere/virtualMachines/{virtualMachineName}/restart
         /// Operation Id: VirtualMachines_Restart
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        public virtual ArmOperation Restart(bool waitForCompletion, CancellationToken cancellationToken = default)
+        public virtual ArmOperation Restart(WaitUntil waitUntil, CancellationToken cancellationToken = default)
         {
             using var scope = _virtualMachineClientDiagnostics.CreateScope("VirtualMachine.Restart");
             scope.Start();
@@ -414,7 +414,7 @@ namespace Azure.ResourceManager.ConnectedVMwarevSphere
             {
                 var response = _virtualMachineRestClient.Restart(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, cancellationToken);
                 var operation = new ConnectedVMwarevSphereArmOperation(_virtualMachineClientDiagnostics, Pipeline, _virtualMachineRestClient.CreateRestartRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name).Request, response, OperationFinalStateVia.Location);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     operation.WaitForCompletionResponse(cancellationToken);
                 return operation;
             }

@@ -305,9 +305,9 @@ namespace Azure.ResourceManager.Sql
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}
         /// Operation Id: Databases_Delete
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        public virtual async Task<ArmOperation> DeleteAsync(bool waitForCompletion, CancellationToken cancellationToken = default)
+        public virtual async Task<ArmOperation> DeleteAsync(WaitUntil waitUntil, CancellationToken cancellationToken = default)
         {
             using var scope = _sqlDatabaseDatabasesClientDiagnostics.CreateScope("SqlDatabase.Delete");
             scope.Start();
@@ -315,7 +315,7 @@ namespace Azure.ResourceManager.Sql
             {
                 var response = await _sqlDatabaseDatabasesRestClient.DeleteAsync(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, cancellationToken).ConfigureAwait(false);
                 var operation = new SqlArmOperation(_sqlDatabaseDatabasesClientDiagnostics, Pipeline, _sqlDatabaseDatabasesRestClient.CreateDeleteRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name).Request, response, OperationFinalStateVia.Location);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     await operation.WaitForCompletionResponseAsync(cancellationToken).ConfigureAwait(false);
                 return operation;
             }
@@ -331,9 +331,9 @@ namespace Azure.ResourceManager.Sql
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}
         /// Operation Id: Databases_Delete
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        public virtual ArmOperation Delete(bool waitForCompletion, CancellationToken cancellationToken = default)
+        public virtual ArmOperation Delete(WaitUntil waitUntil, CancellationToken cancellationToken = default)
         {
             using var scope = _sqlDatabaseDatabasesClientDiagnostics.CreateScope("SqlDatabase.Delete");
             scope.Start();
@@ -341,7 +341,7 @@ namespace Azure.ResourceManager.Sql
             {
                 var response = _sqlDatabaseDatabasesRestClient.Delete(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, cancellationToken);
                 var operation = new SqlArmOperation(_sqlDatabaseDatabasesClientDiagnostics, Pipeline, _sqlDatabaseDatabasesRestClient.CreateDeleteRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name).Request, response, OperationFinalStateVia.Location);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     operation.WaitForCompletionResponse(cancellationToken);
                 return operation;
             }
@@ -357,11 +357,11 @@ namespace Azure.ResourceManager.Sql
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}
         /// Operation Id: Databases_Update
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="data"> The requested database resource state. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="data"/> is null. </exception>
-        public virtual async Task<ArmOperation<SqlDatabase>> UpdateAsync(bool waitForCompletion, PatchableSqlDatabaseData data, CancellationToken cancellationToken = default)
+        public virtual async Task<ArmOperation<SqlDatabase>> UpdateAsync(WaitUntil waitUntil, PatchableSqlDatabaseData data, CancellationToken cancellationToken = default)
         {
             Argument.AssertNotNull(data, nameof(data));
 
@@ -371,7 +371,7 @@ namespace Azure.ResourceManager.Sql
             {
                 var response = await _sqlDatabaseDatabasesRestClient.UpdateAsync(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, data, cancellationToken).ConfigureAwait(false);
                 var operation = new SqlArmOperation<SqlDatabase>(new SqlDatabaseOperationSource(Client), _sqlDatabaseDatabasesClientDiagnostics, Pipeline, _sqlDatabaseDatabasesRestClient.CreateUpdateRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, data).Request, response, OperationFinalStateVia.Location);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     await operation.WaitForCompletionAsync(cancellationToken).ConfigureAwait(false);
                 return operation;
             }
@@ -387,11 +387,11 @@ namespace Azure.ResourceManager.Sql
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}
         /// Operation Id: Databases_Update
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="data"> The requested database resource state. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="data"/> is null. </exception>
-        public virtual ArmOperation<SqlDatabase> Update(bool waitForCompletion, PatchableSqlDatabaseData data, CancellationToken cancellationToken = default)
+        public virtual ArmOperation<SqlDatabase> Update(WaitUntil waitUntil, PatchableSqlDatabaseData data, CancellationToken cancellationToken = default)
         {
             Argument.AssertNotNull(data, nameof(data));
 
@@ -401,7 +401,7 @@ namespace Azure.ResourceManager.Sql
             {
                 var response = _sqlDatabaseDatabasesRestClient.Update(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, data, cancellationToken);
                 var operation = new SqlArmOperation<SqlDatabase>(new SqlDatabaseOperationSource(Client), _sqlDatabaseDatabasesClientDiagnostics, Pipeline, _sqlDatabaseDatabasesRestClient.CreateUpdateRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, data).Request, response, OperationFinalStateVia.Location);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     operation.WaitForCompletion(cancellationToken);
                 return operation;
             }
@@ -533,10 +533,10 @@ namespace Azure.ResourceManager.Sql
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/failover
         /// Operation Id: Databases_Failover
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="replicaType"> The type of replica to be failed over. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        public virtual async Task<ArmOperation> FailoverAsync(bool waitForCompletion, ReplicaType? replicaType = null, CancellationToken cancellationToken = default)
+        public virtual async Task<ArmOperation> FailoverAsync(WaitUntil waitUntil, ReplicaType? replicaType = null, CancellationToken cancellationToken = default)
         {
             using var scope = _sqlDatabaseDatabasesClientDiagnostics.CreateScope("SqlDatabase.Failover");
             scope.Start();
@@ -544,7 +544,7 @@ namespace Azure.ResourceManager.Sql
             {
                 var response = await _sqlDatabaseDatabasesRestClient.FailoverAsync(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, replicaType, cancellationToken).ConfigureAwait(false);
                 var operation = new SqlArmOperation(_sqlDatabaseDatabasesClientDiagnostics, Pipeline, _sqlDatabaseDatabasesRestClient.CreateFailoverRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, replicaType).Request, response, OperationFinalStateVia.Location);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     await operation.WaitForCompletionResponseAsync(cancellationToken).ConfigureAwait(false);
                 return operation;
             }
@@ -560,10 +560,10 @@ namespace Azure.ResourceManager.Sql
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/failover
         /// Operation Id: Databases_Failover
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="replicaType"> The type of replica to be failed over. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        public virtual ArmOperation Failover(bool waitForCompletion, ReplicaType? replicaType = null, CancellationToken cancellationToken = default)
+        public virtual ArmOperation Failover(WaitUntil waitUntil, ReplicaType? replicaType = null, CancellationToken cancellationToken = default)
         {
             using var scope = _sqlDatabaseDatabasesClientDiagnostics.CreateScope("SqlDatabase.Failover");
             scope.Start();
@@ -571,7 +571,7 @@ namespace Azure.ResourceManager.Sql
             {
                 var response = _sqlDatabaseDatabasesRestClient.Failover(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, replicaType, cancellationToken);
                 var operation = new SqlArmOperation(_sqlDatabaseDatabasesClientDiagnostics, Pipeline, _sqlDatabaseDatabasesRestClient.CreateFailoverRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, replicaType).Request, response, OperationFinalStateVia.Location);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     operation.WaitForCompletionResponse(cancellationToken);
                 return operation;
             }
@@ -587,9 +587,9 @@ namespace Azure.ResourceManager.Sql
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/pause
         /// Operation Id: Databases_Pause
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        public virtual async Task<ArmOperation<SqlDatabase>> PauseAsync(bool waitForCompletion, CancellationToken cancellationToken = default)
+        public virtual async Task<ArmOperation<SqlDatabase>> PauseAsync(WaitUntil waitUntil, CancellationToken cancellationToken = default)
         {
             using var scope = _sqlDatabaseDatabasesClientDiagnostics.CreateScope("SqlDatabase.Pause");
             scope.Start();
@@ -597,7 +597,7 @@ namespace Azure.ResourceManager.Sql
             {
                 var response = await _sqlDatabaseDatabasesRestClient.PauseAsync(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, cancellationToken).ConfigureAwait(false);
                 var operation = new SqlArmOperation<SqlDatabase>(new SqlDatabaseOperationSource(Client), _sqlDatabaseDatabasesClientDiagnostics, Pipeline, _sqlDatabaseDatabasesRestClient.CreatePauseRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name).Request, response, OperationFinalStateVia.Location);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     await operation.WaitForCompletionAsync(cancellationToken).ConfigureAwait(false);
                 return operation;
             }
@@ -613,9 +613,9 @@ namespace Azure.ResourceManager.Sql
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/pause
         /// Operation Id: Databases_Pause
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        public virtual ArmOperation<SqlDatabase> Pause(bool waitForCompletion, CancellationToken cancellationToken = default)
+        public virtual ArmOperation<SqlDatabase> Pause(WaitUntil waitUntil, CancellationToken cancellationToken = default)
         {
             using var scope = _sqlDatabaseDatabasesClientDiagnostics.CreateScope("SqlDatabase.Pause");
             scope.Start();
@@ -623,7 +623,7 @@ namespace Azure.ResourceManager.Sql
             {
                 var response = _sqlDatabaseDatabasesRestClient.Pause(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, cancellationToken);
                 var operation = new SqlArmOperation<SqlDatabase>(new SqlDatabaseOperationSource(Client), _sqlDatabaseDatabasesClientDiagnostics, Pipeline, _sqlDatabaseDatabasesRestClient.CreatePauseRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name).Request, response, OperationFinalStateVia.Location);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     operation.WaitForCompletion(cancellationToken);
                 return operation;
             }
@@ -639,9 +639,9 @@ namespace Azure.ResourceManager.Sql
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/resume
         /// Operation Id: Databases_Resume
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        public virtual async Task<ArmOperation<SqlDatabase>> ResumeAsync(bool waitForCompletion, CancellationToken cancellationToken = default)
+        public virtual async Task<ArmOperation<SqlDatabase>> ResumeAsync(WaitUntil waitUntil, CancellationToken cancellationToken = default)
         {
             using var scope = _sqlDatabaseDatabasesClientDiagnostics.CreateScope("SqlDatabase.Resume");
             scope.Start();
@@ -649,7 +649,7 @@ namespace Azure.ResourceManager.Sql
             {
                 var response = await _sqlDatabaseDatabasesRestClient.ResumeAsync(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, cancellationToken).ConfigureAwait(false);
                 var operation = new SqlArmOperation<SqlDatabase>(new SqlDatabaseOperationSource(Client), _sqlDatabaseDatabasesClientDiagnostics, Pipeline, _sqlDatabaseDatabasesRestClient.CreateResumeRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name).Request, response, OperationFinalStateVia.Location);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     await operation.WaitForCompletionAsync(cancellationToken).ConfigureAwait(false);
                 return operation;
             }
@@ -665,9 +665,9 @@ namespace Azure.ResourceManager.Sql
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/resume
         /// Operation Id: Databases_Resume
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        public virtual ArmOperation<SqlDatabase> Resume(bool waitForCompletion, CancellationToken cancellationToken = default)
+        public virtual ArmOperation<SqlDatabase> Resume(WaitUntil waitUntil, CancellationToken cancellationToken = default)
         {
             using var scope = _sqlDatabaseDatabasesClientDiagnostics.CreateScope("SqlDatabase.Resume");
             scope.Start();
@@ -675,7 +675,7 @@ namespace Azure.ResourceManager.Sql
             {
                 var response = _sqlDatabaseDatabasesRestClient.Resume(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, cancellationToken);
                 var operation = new SqlArmOperation<SqlDatabase>(new SqlDatabaseOperationSource(Client), _sqlDatabaseDatabasesClientDiagnostics, Pipeline, _sqlDatabaseDatabasesRestClient.CreateResumeRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name).Request, response, OperationFinalStateVia.Location);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     operation.WaitForCompletion(cancellationToken);
                 return operation;
             }
@@ -691,9 +691,9 @@ namespace Azure.ResourceManager.Sql
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/upgradeDataWarehouse
         /// Operation Id: Databases_UpgradeDataWarehouse
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        public virtual async Task<ArmOperation> UpgradeDataWarehouseAsync(bool waitForCompletion, CancellationToken cancellationToken = default)
+        public virtual async Task<ArmOperation> UpgradeDataWarehouseAsync(WaitUntil waitUntil, CancellationToken cancellationToken = default)
         {
             using var scope = _sqlDatabaseDatabasesClientDiagnostics.CreateScope("SqlDatabase.UpgradeDataWarehouse");
             scope.Start();
@@ -701,7 +701,7 @@ namespace Azure.ResourceManager.Sql
             {
                 var response = await _sqlDatabaseDatabasesRestClient.UpgradeDataWarehouseAsync(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, cancellationToken).ConfigureAwait(false);
                 var operation = new SqlArmOperation(_sqlDatabaseDatabasesClientDiagnostics, Pipeline, _sqlDatabaseDatabasesRestClient.CreateUpgradeDataWarehouseRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name).Request, response, OperationFinalStateVia.Location);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     await operation.WaitForCompletionResponseAsync(cancellationToken).ConfigureAwait(false);
                 return operation;
             }
@@ -717,9 +717,9 @@ namespace Azure.ResourceManager.Sql
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/upgradeDataWarehouse
         /// Operation Id: Databases_UpgradeDataWarehouse
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        public virtual ArmOperation UpgradeDataWarehouse(bool waitForCompletion, CancellationToken cancellationToken = default)
+        public virtual ArmOperation UpgradeDataWarehouse(WaitUntil waitUntil, CancellationToken cancellationToken = default)
         {
             using var scope = _sqlDatabaseDatabasesClientDiagnostics.CreateScope("SqlDatabase.UpgradeDataWarehouse");
             scope.Start();
@@ -727,7 +727,7 @@ namespace Azure.ResourceManager.Sql
             {
                 var response = _sqlDatabaseDatabasesRestClient.UpgradeDataWarehouse(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, cancellationToken);
                 var operation = new SqlArmOperation(_sqlDatabaseDatabasesClientDiagnostics, Pipeline, _sqlDatabaseDatabasesRestClient.CreateUpgradeDataWarehouseRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name).Request, response, OperationFinalStateVia.Location);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     operation.WaitForCompletionResponse(cancellationToken);
                 return operation;
             }
@@ -795,11 +795,11 @@ namespace Azure.ResourceManager.Sql
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/import
         /// Operation Id: Databases_Import
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="parameters"> The database import request parameters. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="parameters"/> is null. </exception>
-        public virtual async Task<ArmOperation<ImportExportOperationResult>> ImportAsync(bool waitForCompletion, ImportExistingDatabaseDefinition parameters, CancellationToken cancellationToken = default)
+        public virtual async Task<ArmOperation<ImportExportOperationResult>> ImportAsync(WaitUntil waitUntil, ImportExistingDatabaseDefinition parameters, CancellationToken cancellationToken = default)
         {
             Argument.AssertNotNull(parameters, nameof(parameters));
 
@@ -809,7 +809,7 @@ namespace Azure.ResourceManager.Sql
             {
                 var response = await _sqlDatabaseDatabasesRestClient.ImportAsync(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, parameters, cancellationToken).ConfigureAwait(false);
                 var operation = new SqlArmOperation<ImportExportOperationResult>(new ImportExportOperationResultOperationSource(), _sqlDatabaseDatabasesClientDiagnostics, Pipeline, _sqlDatabaseDatabasesRestClient.CreateImportRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, parameters).Request, response, OperationFinalStateVia.Location);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     await operation.WaitForCompletionAsync(cancellationToken).ConfigureAwait(false);
                 return operation;
             }
@@ -825,11 +825,11 @@ namespace Azure.ResourceManager.Sql
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/import
         /// Operation Id: Databases_Import
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="parameters"> The database import request parameters. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="parameters"/> is null. </exception>
-        public virtual ArmOperation<ImportExportOperationResult> Import(bool waitForCompletion, ImportExistingDatabaseDefinition parameters, CancellationToken cancellationToken = default)
+        public virtual ArmOperation<ImportExportOperationResult> Import(WaitUntil waitUntil, ImportExistingDatabaseDefinition parameters, CancellationToken cancellationToken = default)
         {
             Argument.AssertNotNull(parameters, nameof(parameters));
 
@@ -839,7 +839,7 @@ namespace Azure.ResourceManager.Sql
             {
                 var response = _sqlDatabaseDatabasesRestClient.Import(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, parameters, cancellationToken);
                 var operation = new SqlArmOperation<ImportExportOperationResult>(new ImportExportOperationResultOperationSource(), _sqlDatabaseDatabasesClientDiagnostics, Pipeline, _sqlDatabaseDatabasesRestClient.CreateImportRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, parameters).Request, response, OperationFinalStateVia.Location);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     operation.WaitForCompletion(cancellationToken);
                 return operation;
             }
@@ -855,11 +855,11 @@ namespace Azure.ResourceManager.Sql
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/export
         /// Operation Id: Databases_Export
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="parameters"> The database export request parameters. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="parameters"/> is null. </exception>
-        public virtual async Task<ArmOperation<ImportExportOperationResult>> ExportAsync(bool waitForCompletion, ExportDatabaseDefinition parameters, CancellationToken cancellationToken = default)
+        public virtual async Task<ArmOperation<ImportExportOperationResult>> ExportAsync(WaitUntil waitUntil, ExportDatabaseDefinition parameters, CancellationToken cancellationToken = default)
         {
             Argument.AssertNotNull(parameters, nameof(parameters));
 
@@ -869,7 +869,7 @@ namespace Azure.ResourceManager.Sql
             {
                 var response = await _sqlDatabaseDatabasesRestClient.ExportAsync(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, parameters, cancellationToken).ConfigureAwait(false);
                 var operation = new SqlArmOperation<ImportExportOperationResult>(new ImportExportOperationResultOperationSource(), _sqlDatabaseDatabasesClientDiagnostics, Pipeline, _sqlDatabaseDatabasesRestClient.CreateExportRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, parameters).Request, response, OperationFinalStateVia.Location);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     await operation.WaitForCompletionAsync(cancellationToken).ConfigureAwait(false);
                 return operation;
             }
@@ -885,11 +885,11 @@ namespace Azure.ResourceManager.Sql
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/export
         /// Operation Id: Databases_Export
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="parameters"> The database export request parameters. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="parameters"/> is null. </exception>
-        public virtual ArmOperation<ImportExportOperationResult> Export(bool waitForCompletion, ExportDatabaseDefinition parameters, CancellationToken cancellationToken = default)
+        public virtual ArmOperation<ImportExportOperationResult> Export(WaitUntil waitUntil, ExportDatabaseDefinition parameters, CancellationToken cancellationToken = default)
         {
             Argument.AssertNotNull(parameters, nameof(parameters));
 
@@ -899,7 +899,7 @@ namespace Azure.ResourceManager.Sql
             {
                 var response = _sqlDatabaseDatabasesRestClient.Export(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, parameters, cancellationToken);
                 var operation = new SqlArmOperation<ImportExportOperationResult>(new ImportExportOperationResultOperationSource(), _sqlDatabaseDatabasesClientDiagnostics, Pipeline, _sqlDatabaseDatabasesRestClient.CreateExportRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, parameters).Request, response, OperationFinalStateVia.Location);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     operation.WaitForCompletion(cancellationToken);
                 return operation;
             }
@@ -1009,11 +1009,11 @@ namespace Azure.ResourceManager.Sql
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/restorePoints
         /// Operation Id: RestorePoints_Create
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="parameters"> The definition for creating the restore point of this database. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="parameters"/> is null. </exception>
-        public virtual async Task<ArmOperation<RestorePoint>> CreateRestorePointAsync(bool waitForCompletion, CreateDatabaseRestorePointDefinition parameters, CancellationToken cancellationToken = default)
+        public virtual async Task<ArmOperation<RestorePoint>> CreateRestorePointAsync(WaitUntil waitUntil, CreateDatabaseRestorePointDefinition parameters, CancellationToken cancellationToken = default)
         {
             Argument.AssertNotNull(parameters, nameof(parameters));
 
@@ -1023,7 +1023,7 @@ namespace Azure.ResourceManager.Sql
             {
                 var response = await _restorePointRestClient.CreateAsync(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, parameters, cancellationToken).ConfigureAwait(false);
                 var operation = new SqlArmOperation<RestorePoint>(new RestorePointOperationSource(Client), _restorePointClientDiagnostics, Pipeline, _restorePointRestClient.CreateCreateRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, parameters).Request, response, OperationFinalStateVia.Location);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     await operation.WaitForCompletionAsync(cancellationToken).ConfigureAwait(false);
                 return operation;
             }
@@ -1039,11 +1039,11 @@ namespace Azure.ResourceManager.Sql
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/restorePoints
         /// Operation Id: RestorePoints_Create
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="parameters"> The definition for creating the restore point of this database. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="parameters"/> is null. </exception>
-        public virtual ArmOperation<RestorePoint> CreateRestorePoint(bool waitForCompletion, CreateDatabaseRestorePointDefinition parameters, CancellationToken cancellationToken = default)
+        public virtual ArmOperation<RestorePoint> CreateRestorePoint(WaitUntil waitUntil, CreateDatabaseRestorePointDefinition parameters, CancellationToken cancellationToken = default)
         {
             Argument.AssertNotNull(parameters, nameof(parameters));
 
@@ -1053,7 +1053,7 @@ namespace Azure.ResourceManager.Sql
             {
                 var response = _restorePointRestClient.Create(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, parameters, cancellationToken);
                 var operation = new SqlArmOperation<RestorePoint>(new RestorePointOperationSource(Client), _restorePointClientDiagnostics, Pipeline, _restorePointRestClient.CreateCreateRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, parameters).Request, response, OperationFinalStateVia.Location);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     operation.WaitForCompletion(cancellationToken);
                 return operation;
             }
@@ -1353,13 +1353,13 @@ namespace Azure.ResourceManager.Sql
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/extensions/{extensionName}
         /// Operation Id: DatabaseExtensions_CreateOrUpdate
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="extensionName"> The String to use. </param>
         /// <param name="parameters"> The database import request parameters. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentException"> <paramref name="extensionName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="extensionName"/> or <paramref name="parameters"/> is null. </exception>
-        public virtual async Task<ArmOperation<ImportExportExtensionsOperationResult>> CreateOrUpdateDatabaseExtensionAsync(bool waitForCompletion, string extensionName, DatabaseExtensions parameters, CancellationToken cancellationToken = default)
+        public virtual async Task<ArmOperation<ImportExportExtensionsOperationResult>> CreateOrUpdateDatabaseExtensionAsync(WaitUntil waitUntil, string extensionName, DatabaseExtensions parameters, CancellationToken cancellationToken = default)
         {
             Argument.AssertNotNullOrEmpty(extensionName, nameof(extensionName));
             Argument.AssertNotNull(parameters, nameof(parameters));
@@ -1370,7 +1370,7 @@ namespace Azure.ResourceManager.Sql
             {
                 var response = await _databaseExtensionsRestClient.CreateOrUpdateAsync(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, extensionName, parameters, cancellationToken).ConfigureAwait(false);
                 var operation = new SqlArmOperation<ImportExportExtensionsOperationResult>(new ImportExportExtensionsOperationResultOperationSource(), _databaseExtensionsClientDiagnostics, Pipeline, _databaseExtensionsRestClient.CreateCreateOrUpdateRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, extensionName, parameters).Request, response, OperationFinalStateVia.Location);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     await operation.WaitForCompletionAsync(cancellationToken).ConfigureAwait(false);
                 return operation;
             }
@@ -1386,13 +1386,13 @@ namespace Azure.ResourceManager.Sql
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/extensions/{extensionName}
         /// Operation Id: DatabaseExtensions_CreateOrUpdate
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="extensionName"> The String to use. </param>
         /// <param name="parameters"> The database import request parameters. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentException"> <paramref name="extensionName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="extensionName"/> or <paramref name="parameters"/> is null. </exception>
-        public virtual ArmOperation<ImportExportExtensionsOperationResult> CreateOrUpdateDatabaseExtension(bool waitForCompletion, string extensionName, DatabaseExtensions parameters, CancellationToken cancellationToken = default)
+        public virtual ArmOperation<ImportExportExtensionsOperationResult> CreateOrUpdateDatabaseExtension(WaitUntil waitUntil, string extensionName, DatabaseExtensions parameters, CancellationToken cancellationToken = default)
         {
             Argument.AssertNotNullOrEmpty(extensionName, nameof(extensionName));
             Argument.AssertNotNull(parameters, nameof(parameters));
@@ -1403,7 +1403,7 @@ namespace Azure.ResourceManager.Sql
             {
                 var response = _databaseExtensionsRestClient.CreateOrUpdate(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, extensionName, parameters, cancellationToken);
                 var operation = new SqlArmOperation<ImportExportExtensionsOperationResult>(new ImportExportExtensionsOperationResultOperationSource(), _databaseExtensionsClientDiagnostics, Pipeline, _databaseExtensionsRestClient.CreateCreateOrUpdateRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, extensionName, parameters).Request, response, OperationFinalStateVia.Location);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     operation.WaitForCompletion(cancellationToken);
                 return operation;
             }

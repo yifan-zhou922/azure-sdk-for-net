@@ -724,18 +724,18 @@ namespace Azure.ResourceManager.Network
         /// Operation Id: LoadBalancers_SwapPublicIPAddresses
         /// </summary>
         /// <param name="subscription"> The <see cref="Subscription" /> instance the method will execute against. </param>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="location"> The region where load balancers are located at. </param>
         /// <param name="parameters"> Parameters that define which VIPs should be swapped. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentException"> <paramref name="location"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="location"/> or <paramref name="parameters"/> is null. </exception>
-        public static async Task<ArmOperation> SwapPublicIPAddressesLoadBalancerAsync(this Subscription subscription, bool waitForCompletion, string location, LoadBalancerVipSwapRequest parameters, CancellationToken cancellationToken = default)
+        public static async Task<ArmOperation> SwapPublicIPAddressesLoadBalancerAsync(this Subscription subscription, WaitUntil waitUntil, string location, LoadBalancerVipSwapRequest parameters, CancellationToken cancellationToken = default)
         {
             Argument.AssertNotNullOrEmpty(location, nameof(location));
             Argument.AssertNotNull(parameters, nameof(parameters));
 
-            return await GetExtensionClient(subscription).SwapPublicIPAddressesLoadBalancerAsync(waitForCompletion, location, parameters, cancellationToken).ConfigureAwait(false);
+            return await GetExtensionClient(subscription).SwapPublicIPAddressesLoadBalancerAsync(waitUntil, location, parameters, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -744,18 +744,18 @@ namespace Azure.ResourceManager.Network
         /// Operation Id: LoadBalancers_SwapPublicIPAddresses
         /// </summary>
         /// <param name="subscription"> The <see cref="Subscription" /> instance the method will execute against. </param>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="location"> The region where load balancers are located at. </param>
         /// <param name="parameters"> Parameters that define which VIPs should be swapped. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentException"> <paramref name="location"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="location"/> or <paramref name="parameters"/> is null. </exception>
-        public static ArmOperation SwapPublicIPAddressesLoadBalancer(this Subscription subscription, bool waitForCompletion, string location, LoadBalancerVipSwapRequest parameters, CancellationToken cancellationToken = default)
+        public static ArmOperation SwapPublicIPAddressesLoadBalancer(this Subscription subscription, WaitUntil waitUntil, string location, LoadBalancerVipSwapRequest parameters, CancellationToken cancellationToken = default)
         {
             Argument.AssertNotNullOrEmpty(location, nameof(location));
             Argument.AssertNotNull(parameters, nameof(parameters));
 
-            return GetExtensionClient(subscription).SwapPublicIPAddressesLoadBalancer(waitForCompletion, location, parameters, cancellationToken);
+            return GetExtensionClient(subscription).SwapPublicIPAddressesLoadBalancer(waitUntil, location, parameters, cancellationToken);
         }
 
         /// <summary>
@@ -1008,18 +1008,18 @@ namespace Azure.ResourceManager.Network
         /// Operation Id: PrivateLinkServices_CheckPrivateLinkServiceVisibility
         /// </summary>
         /// <param name="subscription"> The <see cref="Subscription" /> instance the method will execute against. </param>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="location"> The location of the domain name. </param>
         /// <param name="parameters"> The request body of CheckPrivateLinkService API call. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentException"> <paramref name="location"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="location"/> or <paramref name="parameters"/> is null. </exception>
-        public static async Task<ArmOperation<PrivateLinkServiceVisibility>> CheckPrivateLinkServiceVisibilityPrivateLinkServiceAsync(this Subscription subscription, bool waitForCompletion, string location, CheckPrivateLinkServiceVisibilityRequest parameters, CancellationToken cancellationToken = default)
+        public static async Task<ArmOperation<PrivateLinkServiceVisibility>> CheckPrivateLinkServiceVisibilityPrivateLinkServiceAsync(this Subscription subscription, WaitUntil waitUntil, string location, CheckPrivateLinkServiceVisibilityRequest parameters, CancellationToken cancellationToken = default)
         {
             Argument.AssertNotNullOrEmpty(location, nameof(location));
             Argument.AssertNotNull(parameters, nameof(parameters));
 
-            return await GetExtensionClient(subscription).CheckPrivateLinkServiceVisibilityPrivateLinkServiceAsync(waitForCompletion, location, parameters, cancellationToken).ConfigureAwait(false);
+            return await GetExtensionClient(subscription).CheckPrivateLinkServiceVisibilityPrivateLinkServiceAsync(waitUntil, location, parameters, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -1028,18 +1028,18 @@ namespace Azure.ResourceManager.Network
         /// Operation Id: PrivateLinkServices_CheckPrivateLinkServiceVisibility
         /// </summary>
         /// <param name="subscription"> The <see cref="Subscription" /> instance the method will execute against. </param>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="location"> The location of the domain name. </param>
         /// <param name="parameters"> The request body of CheckPrivateLinkService API call. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentException"> <paramref name="location"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="location"/> or <paramref name="parameters"/> is null. </exception>
-        public static ArmOperation<PrivateLinkServiceVisibility> CheckPrivateLinkServiceVisibilityPrivateLinkService(this Subscription subscription, bool waitForCompletion, string location, CheckPrivateLinkServiceVisibilityRequest parameters, CancellationToken cancellationToken = default)
+        public static ArmOperation<PrivateLinkServiceVisibility> CheckPrivateLinkServiceVisibilityPrivateLinkService(this Subscription subscription, WaitUntil waitUntil, string location, CheckPrivateLinkServiceVisibilityRequest parameters, CancellationToken cancellationToken = default)
         {
             Argument.AssertNotNullOrEmpty(location, nameof(location));
             Argument.AssertNotNull(parameters, nameof(parameters));
 
-            return GetExtensionClient(subscription).CheckPrivateLinkServiceVisibilityPrivateLinkService(waitForCompletion, location, parameters, cancellationToken);
+            return GetExtensionClient(subscription).CheckPrivateLinkServiceVisibilityPrivateLinkService(waitUntil, location, parameters, cancellationToken);
         }
 
         /// <summary>

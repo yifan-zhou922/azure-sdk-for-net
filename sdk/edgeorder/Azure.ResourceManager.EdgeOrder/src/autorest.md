@@ -63,5 +63,8 @@ directive:
   - rename-model:
       from: Specification
       to: ProductSpecification
+  - from: edgeorder.json
+    where: $.definitions.FilterableProperty.properties.type
+    transform: $["x-ms-enum"]["name"] = "ProductFilterType"
 
 ```

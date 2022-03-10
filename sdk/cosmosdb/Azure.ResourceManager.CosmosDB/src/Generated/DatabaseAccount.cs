@@ -230,9 +230,9 @@ namespace Azure.ResourceManager.CosmosDB
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}
         /// Operation Id: DatabaseAccounts_Delete
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        public virtual async Task<ArmOperation> DeleteAsync(bool waitForCompletion, CancellationToken cancellationToken = default)
+        public virtual async Task<ArmOperation> DeleteAsync(WaitUntil waitUntil, CancellationToken cancellationToken = default)
         {
             using var scope = _databaseAccountClientDiagnostics.CreateScope("DatabaseAccount.Delete");
             scope.Start();
@@ -240,7 +240,7 @@ namespace Azure.ResourceManager.CosmosDB
             {
                 var response = await _databaseAccountRestClient.DeleteAsync(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, cancellationToken).ConfigureAwait(false);
                 var operation = new CosmosDBArmOperation(_databaseAccountClientDiagnostics, Pipeline, _databaseAccountRestClient.CreateDeleteRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name).Request, response, OperationFinalStateVia.Location);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     await operation.WaitForCompletionResponseAsync(cancellationToken).ConfigureAwait(false);
                 return operation;
             }
@@ -256,9 +256,9 @@ namespace Azure.ResourceManager.CosmosDB
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}
         /// Operation Id: DatabaseAccounts_Delete
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        public virtual ArmOperation Delete(bool waitForCompletion, CancellationToken cancellationToken = default)
+        public virtual ArmOperation Delete(WaitUntil waitUntil, CancellationToken cancellationToken = default)
         {
             using var scope = _databaseAccountClientDiagnostics.CreateScope("DatabaseAccount.Delete");
             scope.Start();
@@ -266,7 +266,7 @@ namespace Azure.ResourceManager.CosmosDB
             {
                 var response = _databaseAccountRestClient.Delete(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, cancellationToken);
                 var operation = new CosmosDBArmOperation(_databaseAccountClientDiagnostics, Pipeline, _databaseAccountRestClient.CreateDeleteRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name).Request, response, OperationFinalStateVia.Location);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     operation.WaitForCompletionResponse(cancellationToken);
                 return operation;
             }
@@ -282,11 +282,11 @@ namespace Azure.ResourceManager.CosmosDB
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}
         /// Operation Id: DatabaseAccounts_Update
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="data"> The parameters to provide for the current database account. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="data"/> is null. </exception>
-        public virtual async Task<ArmOperation<DatabaseAccount>> UpdateAsync(bool waitForCompletion, PatchableDatabaseAccountData data, CancellationToken cancellationToken = default)
+        public virtual async Task<ArmOperation<DatabaseAccount>> UpdateAsync(WaitUntil waitUntil, PatchableDatabaseAccountData data, CancellationToken cancellationToken = default)
         {
             Argument.AssertNotNull(data, nameof(data));
 
@@ -296,7 +296,7 @@ namespace Azure.ResourceManager.CosmosDB
             {
                 var response = await _databaseAccountRestClient.UpdateAsync(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, data, cancellationToken).ConfigureAwait(false);
                 var operation = new CosmosDBArmOperation<DatabaseAccount>(new DatabaseAccountOperationSource(Client), _databaseAccountClientDiagnostics, Pipeline, _databaseAccountRestClient.CreateUpdateRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, data).Request, response, OperationFinalStateVia.Location);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     await operation.WaitForCompletionAsync(cancellationToken).ConfigureAwait(false);
                 return operation;
             }
@@ -312,11 +312,11 @@ namespace Azure.ResourceManager.CosmosDB
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}
         /// Operation Id: DatabaseAccounts_Update
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="data"> The parameters to provide for the current database account. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="data"/> is null. </exception>
-        public virtual ArmOperation<DatabaseAccount> Update(bool waitForCompletion, PatchableDatabaseAccountData data, CancellationToken cancellationToken = default)
+        public virtual ArmOperation<DatabaseAccount> Update(WaitUntil waitUntil, PatchableDatabaseAccountData data, CancellationToken cancellationToken = default)
         {
             Argument.AssertNotNull(data, nameof(data));
 
@@ -326,7 +326,7 @@ namespace Azure.ResourceManager.CosmosDB
             {
                 var response = _databaseAccountRestClient.Update(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, data, cancellationToken);
                 var operation = new CosmosDBArmOperation<DatabaseAccount>(new DatabaseAccountOperationSource(Client), _databaseAccountClientDiagnostics, Pipeline, _databaseAccountRestClient.CreateUpdateRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, data).Request, response, OperationFinalStateVia.Location);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     operation.WaitForCompletion(cancellationToken);
                 return operation;
             }
@@ -342,11 +342,11 @@ namespace Azure.ResourceManager.CosmosDB
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/failoverPriorityChange
         /// Operation Id: DatabaseAccounts_FailoverPriorityChange
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="failoverParameters"> The new failover policies for the database account. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="failoverParameters"/> is null. </exception>
-        public virtual async Task<ArmOperation> FailoverPriorityChangeAsync(bool waitForCompletion, FailoverPolicies failoverParameters, CancellationToken cancellationToken = default)
+        public virtual async Task<ArmOperation> FailoverPriorityChangeAsync(WaitUntil waitUntil, FailoverPolicies failoverParameters, CancellationToken cancellationToken = default)
         {
             Argument.AssertNotNull(failoverParameters, nameof(failoverParameters));
 
@@ -356,7 +356,7 @@ namespace Azure.ResourceManager.CosmosDB
             {
                 var response = await _databaseAccountRestClient.FailoverPriorityChangeAsync(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, failoverParameters, cancellationToken).ConfigureAwait(false);
                 var operation = new CosmosDBArmOperation(_databaseAccountClientDiagnostics, Pipeline, _databaseAccountRestClient.CreateFailoverPriorityChangeRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, failoverParameters).Request, response, OperationFinalStateVia.Location);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     await operation.WaitForCompletionResponseAsync(cancellationToken).ConfigureAwait(false);
                 return operation;
             }
@@ -372,11 +372,11 @@ namespace Azure.ResourceManager.CosmosDB
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/failoverPriorityChange
         /// Operation Id: DatabaseAccounts_FailoverPriorityChange
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="failoverParameters"> The new failover policies for the database account. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="failoverParameters"/> is null. </exception>
-        public virtual ArmOperation FailoverPriorityChange(bool waitForCompletion, FailoverPolicies failoverParameters, CancellationToken cancellationToken = default)
+        public virtual ArmOperation FailoverPriorityChange(WaitUntil waitUntil, FailoverPolicies failoverParameters, CancellationToken cancellationToken = default)
         {
             Argument.AssertNotNull(failoverParameters, nameof(failoverParameters));
 
@@ -386,7 +386,7 @@ namespace Azure.ResourceManager.CosmosDB
             {
                 var response = _databaseAccountRestClient.FailoverPriorityChange(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, failoverParameters, cancellationToken);
                 var operation = new CosmosDBArmOperation(_databaseAccountClientDiagnostics, Pipeline, _databaseAccountRestClient.CreateFailoverPriorityChangeRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, failoverParameters).Request, response, OperationFinalStateVia.Location);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     operation.WaitForCompletionResponse(cancellationToken);
                 return operation;
             }
@@ -500,11 +500,11 @@ namespace Azure.ResourceManager.CosmosDB
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/offlineRegion
         /// Operation Id: DatabaseAccounts_OfflineRegion
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="regionParameterForOffline"> Cosmos DB region to offline for the database account. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="regionParameterForOffline"/> is null. </exception>
-        public virtual async Task<ArmOperation> OfflineRegionAsync(bool waitForCompletion, RegionForOnlineOffline regionParameterForOffline, CancellationToken cancellationToken = default)
+        public virtual async Task<ArmOperation> OfflineRegionAsync(WaitUntil waitUntil, RegionForOnlineOffline regionParameterForOffline, CancellationToken cancellationToken = default)
         {
             Argument.AssertNotNull(regionParameterForOffline, nameof(regionParameterForOffline));
 
@@ -514,7 +514,7 @@ namespace Azure.ResourceManager.CosmosDB
             {
                 var response = await _databaseAccountRestClient.OfflineRegionAsync(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, regionParameterForOffline, cancellationToken).ConfigureAwait(false);
                 var operation = new CosmosDBArmOperation(_databaseAccountClientDiagnostics, Pipeline, _databaseAccountRestClient.CreateOfflineRegionRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, regionParameterForOffline).Request, response, OperationFinalStateVia.Location);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     await operation.WaitForCompletionResponseAsync(cancellationToken).ConfigureAwait(false);
                 return operation;
             }
@@ -530,11 +530,11 @@ namespace Azure.ResourceManager.CosmosDB
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/offlineRegion
         /// Operation Id: DatabaseAccounts_OfflineRegion
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="regionParameterForOffline"> Cosmos DB region to offline for the database account. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="regionParameterForOffline"/> is null. </exception>
-        public virtual ArmOperation OfflineRegion(bool waitForCompletion, RegionForOnlineOffline regionParameterForOffline, CancellationToken cancellationToken = default)
+        public virtual ArmOperation OfflineRegion(WaitUntil waitUntil, RegionForOnlineOffline regionParameterForOffline, CancellationToken cancellationToken = default)
         {
             Argument.AssertNotNull(regionParameterForOffline, nameof(regionParameterForOffline));
 
@@ -544,7 +544,7 @@ namespace Azure.ResourceManager.CosmosDB
             {
                 var response = _databaseAccountRestClient.OfflineRegion(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, regionParameterForOffline, cancellationToken);
                 var operation = new CosmosDBArmOperation(_databaseAccountClientDiagnostics, Pipeline, _databaseAccountRestClient.CreateOfflineRegionRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, regionParameterForOffline).Request, response, OperationFinalStateVia.Location);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     operation.WaitForCompletionResponse(cancellationToken);
                 return operation;
             }
@@ -560,11 +560,11 @@ namespace Azure.ResourceManager.CosmosDB
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/onlineRegion
         /// Operation Id: DatabaseAccounts_OnlineRegion
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="regionParameterForOnline"> Cosmos DB region to online for the database account. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="regionParameterForOnline"/> is null. </exception>
-        public virtual async Task<ArmOperation> OnlineRegionAsync(bool waitForCompletion, RegionForOnlineOffline regionParameterForOnline, CancellationToken cancellationToken = default)
+        public virtual async Task<ArmOperation> OnlineRegionAsync(WaitUntil waitUntil, RegionForOnlineOffline regionParameterForOnline, CancellationToken cancellationToken = default)
         {
             Argument.AssertNotNull(regionParameterForOnline, nameof(regionParameterForOnline));
 
@@ -574,7 +574,7 @@ namespace Azure.ResourceManager.CosmosDB
             {
                 var response = await _databaseAccountRestClient.OnlineRegionAsync(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, regionParameterForOnline, cancellationToken).ConfigureAwait(false);
                 var operation = new CosmosDBArmOperation(_databaseAccountClientDiagnostics, Pipeline, _databaseAccountRestClient.CreateOnlineRegionRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, regionParameterForOnline).Request, response, OperationFinalStateVia.Location);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     await operation.WaitForCompletionResponseAsync(cancellationToken).ConfigureAwait(false);
                 return operation;
             }
@@ -590,11 +590,11 @@ namespace Azure.ResourceManager.CosmosDB
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/onlineRegion
         /// Operation Id: DatabaseAccounts_OnlineRegion
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="regionParameterForOnline"> Cosmos DB region to online for the database account. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="regionParameterForOnline"/> is null. </exception>
-        public virtual ArmOperation OnlineRegion(bool waitForCompletion, RegionForOnlineOffline regionParameterForOnline, CancellationToken cancellationToken = default)
+        public virtual ArmOperation OnlineRegion(WaitUntil waitUntil, RegionForOnlineOffline regionParameterForOnline, CancellationToken cancellationToken = default)
         {
             Argument.AssertNotNull(regionParameterForOnline, nameof(regionParameterForOnline));
 
@@ -604,7 +604,7 @@ namespace Azure.ResourceManager.CosmosDB
             {
                 var response = _databaseAccountRestClient.OnlineRegion(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, regionParameterForOnline, cancellationToken);
                 var operation = new CosmosDBArmOperation(_databaseAccountClientDiagnostics, Pipeline, _databaseAccountRestClient.CreateOnlineRegionRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, regionParameterForOnline).Request, response, OperationFinalStateVia.Location);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     operation.WaitForCompletionResponse(cancellationToken);
                 return operation;
             }
@@ -664,11 +664,11 @@ namespace Azure.ResourceManager.CosmosDB
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/regenerateKey
         /// Operation Id: DatabaseAccounts_RegenerateKey
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="keyToRegenerate"> The name of the key to regenerate. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="keyToRegenerate"/> is null. </exception>
-        public virtual async Task<ArmOperation> RegenerateKeyAsync(bool waitForCompletion, DatabaseAccountRegenerateKeyData keyToRegenerate, CancellationToken cancellationToken = default)
+        public virtual async Task<ArmOperation> RegenerateKeyAsync(WaitUntil waitUntil, DatabaseAccountRegenerateKeyData keyToRegenerate, CancellationToken cancellationToken = default)
         {
             Argument.AssertNotNull(keyToRegenerate, nameof(keyToRegenerate));
 
@@ -678,7 +678,7 @@ namespace Azure.ResourceManager.CosmosDB
             {
                 var response = await _databaseAccountRestClient.RegenerateKeyAsync(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, keyToRegenerate, cancellationToken).ConfigureAwait(false);
                 var operation = new CosmosDBArmOperation(_databaseAccountClientDiagnostics, Pipeline, _databaseAccountRestClient.CreateRegenerateKeyRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, keyToRegenerate).Request, response, OperationFinalStateVia.Location);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     await operation.WaitForCompletionResponseAsync(cancellationToken).ConfigureAwait(false);
                 return operation;
             }
@@ -694,11 +694,11 @@ namespace Azure.ResourceManager.CosmosDB
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}/regenerateKey
         /// Operation Id: DatabaseAccounts_RegenerateKey
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="keyToRegenerate"> The name of the key to regenerate. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="keyToRegenerate"/> is null. </exception>
-        public virtual ArmOperation RegenerateKey(bool waitForCompletion, DatabaseAccountRegenerateKeyData keyToRegenerate, CancellationToken cancellationToken = default)
+        public virtual ArmOperation RegenerateKey(WaitUntil waitUntil, DatabaseAccountRegenerateKeyData keyToRegenerate, CancellationToken cancellationToken = default)
         {
             Argument.AssertNotNull(keyToRegenerate, nameof(keyToRegenerate));
 
@@ -708,7 +708,7 @@ namespace Azure.ResourceManager.CosmosDB
             {
                 var response = _databaseAccountRestClient.RegenerateKey(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, keyToRegenerate, cancellationToken);
                 var operation = new CosmosDBArmOperation(_databaseAccountClientDiagnostics, Pipeline, _databaseAccountRestClient.CreateRegenerateKeyRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, keyToRegenerate).Request, response, OperationFinalStateVia.Location);
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     operation.WaitForCompletionResponse(cancellationToken);
                 return operation;
             }

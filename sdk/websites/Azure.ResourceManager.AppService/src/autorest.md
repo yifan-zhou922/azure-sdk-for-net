@@ -261,6 +261,10 @@ directive:
     transform: >
         $["format"] = "duration";
         $["x-ms-format"] = "duration-constant";
+  - from: ResourceProvider.json
+    where: $.definitions.ResourceNameAvailabilityRequest.properties.type
+    transform: >
+        $["x-ms-enum"]["name"] = "CheckNameResourceType";
 #   - from: swagger-document
 #     where: $.definitions.SiteConfig.properties.defaultDocuments
 #     transform: >

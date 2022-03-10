@@ -486,18 +486,18 @@ namespace Azure.ResourceManager.Network
         /// Operation Id: PrivateLinkServices_CheckPrivateLinkServiceVisibilityByResourceGroup
         /// </summary>
         /// <param name="resourceGroup"> The <see cref="ResourceGroup" /> instance the method will execute against. </param>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="location"> The location of the domain name. </param>
         /// <param name="parameters"> The request body of CheckPrivateLinkService API call. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentException"> <paramref name="location"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="location"/> or <paramref name="parameters"/> is null. </exception>
-        public static async Task<ArmOperation<PrivateLinkServiceVisibility>> CheckPrivateLinkServiceVisibilityByResourceGroupPrivateLinkServiceAsync(this ResourceGroup resourceGroup, bool waitForCompletion, string location, CheckPrivateLinkServiceVisibilityRequest parameters, CancellationToken cancellationToken = default)
+        public static async Task<ArmOperation<PrivateLinkServiceVisibility>> CheckPrivateLinkServiceVisibilityByResourceGroupPrivateLinkServiceAsync(this ResourceGroup resourceGroup, WaitUntil waitUntil, string location, CheckPrivateLinkServiceVisibilityRequest parameters, CancellationToken cancellationToken = default)
         {
             Argument.AssertNotNullOrEmpty(location, nameof(location));
             Argument.AssertNotNull(parameters, nameof(parameters));
 
-            return await GetExtensionClient(resourceGroup).CheckPrivateLinkServiceVisibilityByResourceGroupPrivateLinkServiceAsync(waitForCompletion, location, parameters, cancellationToken).ConfigureAwait(false);
+            return await GetExtensionClient(resourceGroup).CheckPrivateLinkServiceVisibilityByResourceGroupPrivateLinkServiceAsync(waitUntil, location, parameters, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -506,18 +506,18 @@ namespace Azure.ResourceManager.Network
         /// Operation Id: PrivateLinkServices_CheckPrivateLinkServiceVisibilityByResourceGroup
         /// </summary>
         /// <param name="resourceGroup"> The <see cref="ResourceGroup" /> instance the method will execute against. </param>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="location"> The location of the domain name. </param>
         /// <param name="parameters"> The request body of CheckPrivateLinkService API call. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentException"> <paramref name="location"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="location"/> or <paramref name="parameters"/> is null. </exception>
-        public static ArmOperation<PrivateLinkServiceVisibility> CheckPrivateLinkServiceVisibilityByResourceGroupPrivateLinkService(this ResourceGroup resourceGroup, bool waitForCompletion, string location, CheckPrivateLinkServiceVisibilityRequest parameters, CancellationToken cancellationToken = default)
+        public static ArmOperation<PrivateLinkServiceVisibility> CheckPrivateLinkServiceVisibilityByResourceGroupPrivateLinkService(this ResourceGroup resourceGroup, WaitUntil waitUntil, string location, CheckPrivateLinkServiceVisibilityRequest parameters, CancellationToken cancellationToken = default)
         {
             Argument.AssertNotNullOrEmpty(location, nameof(location));
             Argument.AssertNotNull(parameters, nameof(parameters));
 
-            return GetExtensionClient(resourceGroup).CheckPrivateLinkServiceVisibilityByResourceGroupPrivateLinkService(waitForCompletion, location, parameters, cancellationToken);
+            return GetExtensionClient(resourceGroup).CheckPrivateLinkServiceVisibilityByResourceGroupPrivateLinkService(waitUntil, location, parameters, cancellationToken);
         }
 
         /// <summary>

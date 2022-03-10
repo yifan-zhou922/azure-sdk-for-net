@@ -15,31 +15,31 @@ namespace Azure.ResourceManager.EdgeOrder.Models
     public partial class FilterableProperty
     {
         /// <summary> Initializes a new instance of FilterableProperty. </summary>
-        /// <param name="type"> Type of product filter. </param>
+        /// <param name="productFilterType"> Type of product filter. </param>
         /// <param name="supportedValues"> Values to be filtered. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="supportedValues"/> is null. </exception>
-        public FilterableProperty(SupportedFilterTypes type, IEnumerable<string> supportedValues)
+        public FilterableProperty(ProductFilterType productFilterType, IEnumerable<string> supportedValues)
         {
             if (supportedValues == null)
             {
                 throw new ArgumentNullException(nameof(supportedValues));
             }
 
-            Type = type;
+            ProductFilterType = productFilterType;
             SupportedValues = supportedValues.ToList();
         }
 
         /// <summary> Initializes a new instance of FilterableProperty. </summary>
-        /// <param name="type"> Type of product filter. </param>
+        /// <param name="productFilterType"> Type of product filter. </param>
         /// <param name="supportedValues"> Values to be filtered. </param>
-        internal FilterableProperty(SupportedFilterTypes type, IList<string> supportedValues)
+        internal FilterableProperty(ProductFilterType productFilterType, IList<string> supportedValues)
         {
-            Type = type;
+            ProductFilterType = productFilterType;
             SupportedValues = supportedValues;
         }
 
         /// <summary> Type of product filter. </summary>
-        public SupportedFilterTypes Type { get; set; }
+        public ProductFilterType ProductFilterType { get; set; }
         /// <summary> Values to be filtered. </summary>
         public IList<string> SupportedValues { get; }
     }

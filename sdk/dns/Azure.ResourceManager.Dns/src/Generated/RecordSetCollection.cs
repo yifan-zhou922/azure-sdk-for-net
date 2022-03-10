@@ -39,7 +39,7 @@ namespace DnsManagementClient
         {
             _recordSetClientDiagnostics = new ClientDiagnostics("DnsManagementClient", RecordSet.ResourceType.Namespace, DiagnosticOptions);
             TryGetApiVersion(RecordSet.ResourceType, out string recordSetApiVersion);
-            _recordSetRestClient = new RecordSetsRestOperations(_recordSetClientDiagnostics, Pipeline, DiagnosticOptions.ApplicationId, BaseUri, recordSetApiVersion);
+            _recordSetRestClient = new RecordSetsRestOperations(Pipeline, DiagnosticOptions.ApplicationId, BaseUri, recordSetApiVersion);
 #if DEBUG
 			ValidateResourceId(Id);
 #endif
@@ -56,14 +56,14 @@ namespace DnsManagementClient
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/dnsZones/{zoneName}/A/{relativeRecordSetName}
         /// Operation Id: RecordSets_CreateOrUpdate
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="relativeRecordSetName"> The name of the record set, relative to the name of the zone. </param>
         /// <param name="parameters"> Parameters supplied to the CreateOrUpdate operation. </param>
         /// <param name="ifMatch"> The etag of the record set. Omit this value to always overwrite the current record set. Specify the last-seen etag value to prevent accidentally overwriting any concurrent changes. </param>
         /// <param name="ifNoneMatch"> Set to &apos;*&apos; to allow a new record set to be created, but to prevent updating an existing record set. Other values will be ignored. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="relativeRecordSetName"/> or <paramref name="parameters"/> is null. </exception>
-        public async virtual Task<ArmOperation<RecordSet>> CreateOrUpdateAsync(bool waitForCompletion, string relativeRecordSetName, RecordSetData parameters, string ifMatch = null, string ifNoneMatch = null, CancellationToken cancellationToken = default)
+        public virtual async Task<ArmOperation<RecordSet>> CreateOrUpdateAsync(WaitUntil waitUntil, string relativeRecordSetName, RecordSetData parameters, string ifMatch = null, string ifNoneMatch = null, CancellationToken cancellationToken = default)
         {
             Argument.AssertNotNull(relativeRecordSetName, nameof(relativeRecordSetName));
             Argument.AssertNotNull(parameters, nameof(parameters));
@@ -74,7 +74,7 @@ namespace DnsManagementClient
             {
                 var response = await _recordSetRestClient.CreateOrUpdateAsync(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, "A".ToRecordType(), relativeRecordSetName, parameters, ifMatch, ifNoneMatch, cancellationToken).ConfigureAwait(false);
                 var operation = new DnsManagementClientArmOperation<RecordSet>(Response.FromValue(new RecordSet(Client, response), response.GetRawResponse()));
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     await operation.WaitForCompletionAsync(cancellationToken).ConfigureAwait(false);
                 return operation;
             }
@@ -90,14 +90,14 @@ namespace DnsManagementClient
         /// Request Path: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/dnsZones/{zoneName}/A/{relativeRecordSetName}
         /// Operation Id: RecordSets_CreateOrUpdate
         /// </summary>
-        /// <param name="waitForCompletion"> Waits for the completion of the long running operations. </param>
+        /// <param name="waitUntil"> "F:WaitUntil.Completed" if the method should wait to return until the long-running operation has completed on the service; "F:WaitUntil.Started" if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="relativeRecordSetName"> The name of the record set, relative to the name of the zone. </param>
         /// <param name="parameters"> Parameters supplied to the CreateOrUpdate operation. </param>
         /// <param name="ifMatch"> The etag of the record set. Omit this value to always overwrite the current record set. Specify the last-seen etag value to prevent accidentally overwriting any concurrent changes. </param>
         /// <param name="ifNoneMatch"> Set to &apos;*&apos; to allow a new record set to be created, but to prevent updating an existing record set. Other values will be ignored. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="relativeRecordSetName"/> or <paramref name="parameters"/> is null. </exception>
-        public virtual ArmOperation<RecordSet> CreateOrUpdate(bool waitForCompletion, string relativeRecordSetName, RecordSetData parameters, string ifMatch = null, string ifNoneMatch = null, CancellationToken cancellationToken = default)
+        public virtual ArmOperation<RecordSet> CreateOrUpdate(WaitUntil waitUntil, string relativeRecordSetName, RecordSetData parameters, string ifMatch = null, string ifNoneMatch = null, CancellationToken cancellationToken = default)
         {
             Argument.AssertNotNull(relativeRecordSetName, nameof(relativeRecordSetName));
             Argument.AssertNotNull(parameters, nameof(parameters));
@@ -108,7 +108,7 @@ namespace DnsManagementClient
             {
                 var response = _recordSetRestClient.CreateOrUpdate(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, "A".ToRecordType(), relativeRecordSetName, parameters, ifMatch, ifNoneMatch, cancellationToken);
                 var operation = new DnsManagementClientArmOperation<RecordSet>(Response.FromValue(new RecordSet(Client, response), response.GetRawResponse()));
-                if (waitForCompletion)
+                if (waitUntil == WaitUntil.Completed)
                     operation.WaitForCompletion(cancellationToken);
                 return operation;
             }
@@ -127,7 +127,7 @@ namespace DnsManagementClient
         /// <param name="relativeRecordSetName"> The name of the record set, relative to the name of the zone. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="relativeRecordSetName"/> is null. </exception>
-        public async virtual Task<Response<RecordSet>> GetAsync(string relativeRecordSetName, CancellationToken cancellationToken = default)
+        public virtual async Task<Response<RecordSet>> GetAsync(string relativeRecordSetName, CancellationToken cancellationToken = default)
         {
             Argument.AssertNotNull(relativeRecordSetName, nameof(relativeRecordSetName));
 
@@ -137,7 +137,7 @@ namespace DnsManagementClient
             {
                 var response = await _recordSetRestClient.GetAsync(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, "A".ToRecordType(), relativeRecordSetName, cancellationToken).ConfigureAwait(false);
                 if (response.Value == null)
-                    throw await _recordSetClientDiagnostics.CreateRequestFailedExceptionAsync(response.GetRawResponse()).ConfigureAwait(false);
+                    throw new RequestFailedException(response.GetRawResponse());
                 return Response.FromValue(new RecordSet(Client, response.Value), response.GetRawResponse());
             }
             catch (Exception e)
@@ -165,7 +165,7 @@ namespace DnsManagementClient
             {
                 var response = _recordSetRestClient.Get(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, "A".ToRecordType(), relativeRecordSetName, cancellationToken);
                 if (response.Value == null)
-                    throw _recordSetClientDiagnostics.CreateRequestFailedException(response.GetRawResponse());
+                    throw new RequestFailedException(response.GetRawResponse());
                 return Response.FromValue(new RecordSet(Client, response.Value), response.GetRawResponse());
             }
             catch (Exception e)
@@ -271,7 +271,7 @@ namespace DnsManagementClient
         /// <param name="relativeRecordSetName"> The name of the record set, relative to the name of the zone. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="relativeRecordSetName"/> is null. </exception>
-        public async virtual Task<Response<bool>> ExistsAsync(string relativeRecordSetName, CancellationToken cancellationToken = default)
+        public virtual async Task<Response<bool>> ExistsAsync(string relativeRecordSetName, CancellationToken cancellationToken = default)
         {
             Argument.AssertNotNull(relativeRecordSetName, nameof(relativeRecordSetName));
 
@@ -323,7 +323,7 @@ namespace DnsManagementClient
         /// <param name="relativeRecordSetName"> The name of the record set, relative to the name of the zone. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="relativeRecordSetName"/> is null. </exception>
-        public async virtual Task<Response<RecordSet>> GetIfExistsAsync(string relativeRecordSetName, CancellationToken cancellationToken = default)
+        public virtual async Task<Response<RecordSet>> GetIfExistsAsync(string relativeRecordSetName, CancellationToken cancellationToken = default)
         {
             Argument.AssertNotNull(relativeRecordSetName, nameof(relativeRecordSetName));
 
