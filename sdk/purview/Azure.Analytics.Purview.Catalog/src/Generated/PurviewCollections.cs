@@ -6,28 +6,21 @@
 #nullable disable
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Azure;
+using Azure.Analytics.Purview.Catalog.Models;
 using Azure.Core;
 using Azure.Core.Pipeline;
 
 namespace Azure.Analytics.Purview.Catalog
 {
-    // Data plane generated sub-client.
-    /// <summary> The PurviewCollections sub-client. </summary>
+    /// <summary> The PurviewCollections service client. </summary>
     public partial class PurviewCollections
     {
-        private static readonly string[] AuthorizationScopes = new string[] { "https://purview.azure.net/.default" };
-        private readonly TokenCredential _tokenCredential;
+        private readonly ClientDiagnostics _clientDiagnostics;
         private readonly HttpPipeline _pipeline;
-        private readonly Uri _endpoint;
-        private readonly string _apiVersion;
-
-        /// <summary> The ClientDiagnostics is used to provide tracing support for the client library. </summary>
-        internal ClientDiagnostics ClientDiagnostics { get; }
-
-        /// <summary> The HTTP pipeline for sending and receiving REST requests and responses. </summary>
-        public virtual HttpPipeline Pipeline => _pipeline;
+        internal PurviewCollectionsRestClient RestClient { get; }
 
         /// <summary> Initializes a new instance of PurviewCollections for mocking. </summary>
         protected PurviewCollections()
@@ -35,18 +28,38 @@ namespace Azure.Analytics.Purview.Catalog
         }
 
         /// <summary> Initializes a new instance of PurviewCollections. </summary>
+        /// <param name="endpoint"> The catalog endpoint of your Purview account. Example: https://{accountName}.purview.azure.com. </param>
+        /// <param name="credential"> A credential used to authenticate to an Azure Service. </param>
+        /// <param name="options"> The options for configuring the client. </param>
+        public PurviewCollections(Uri endpoint, TokenCredential credential, PurviewCatalogServiceRestAPIDocumentClientOptions options = null)
+        {
+            if (endpoint == null)
+            {
+                throw new ArgumentNullException(nameof(endpoint));
+            }
+            if (credential == null)
+            {
+                throw new ArgumentNullException(nameof(credential));
+            }
+
+            options ??= new PurviewCatalogServiceRestAPIDocumentClientOptions();
+            _clientDiagnostics = new ClientDiagnostics(options);
+            string[] scopes = { "https://purview.azure.net/.default" };
+            _pipeline = HttpPipelineBuilder.Build(options, new BearerTokenAuthenticationPolicy(credential, scopes));
+            RestClient = new PurviewCollectionsRestClient(_clientDiagnostics, _pipeline, endpoint, options.Version);
+        }
+
+        /// <summary> Initializes a new instance of PurviewCollections. </summary>
         /// <param name="clientDiagnostics"> The handler for diagnostic messaging in the client. </param>
         /// <param name="pipeline"> The HTTP pipeline for sending and receiving REST requests and responses. </param>
-        /// <param name="tokenCredential"> The token credential to copy. </param>
         /// <param name="endpoint"> The catalog endpoint of your Purview account. Example: https://{accountName}.purview.azure.com. </param>
         /// <param name="apiVersion"> Api Version. </param>
-        internal PurviewCollections(ClientDiagnostics clientDiagnostics, HttpPipeline pipeline, TokenCredential tokenCredential, Uri endpoint, string apiVersion)
+        /// <exception cref="ArgumentNullException"> <paramref name="clientDiagnostics"/>, <paramref name="pipeline"/>, <paramref name="endpoint"/> or <paramref name="apiVersion"/> is null. </exception>
+        internal PurviewCollections(ClientDiagnostics clientDiagnostics, HttpPipeline pipeline, Uri endpoint, string apiVersion = "2022-03-01-preview")
         {
-            ClientDiagnostics = clientDiagnostics;
+            RestClient = new PurviewCollectionsRestClient(clientDiagnostics, pipeline, endpoint, apiVersion);
+            _clientDiagnostics = clientDiagnostics;
             _pipeline = pipeline;
-            _tokenCredential = tokenCredential;
-            _endpoint = endpoint;
-            _apiVersion = apiVersion;
         }
 
         /// <summary>
@@ -55,24 +68,15 @@ namespace Azure.Analytics.Purview.Catalog
         /// Map and array of collections are not well supported. E.g., array&lt;array&lt;int&gt;&gt;, array&lt;map&lt;string, int&gt;&gt;.
         /// </summary>
         /// <param name="collection"> the collection unique name. </param>
-        /// <param name="content"> The content to send as the body of the request. Details of the request body schema are in the Remarks section below. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="collection"/> or <paramref name="content"/> is null. </exception>
-        /// <exception cref="ArgumentException"> <paramref name="collection"/> is an empty string, and was expected to be non-empty. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewCollections.xml" path="doc/members/member[@name='CreateOrUpdateEntityAsync(String,RequestContent,RequestContext)']/*" />
-        public virtual async Task<Response> CreateOrUpdateEntityAsync(string collection, RequestContent content, RequestContext context = null)
+        /// <param name="entity"> Atlas entity with extended information. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual async Task<Response<EntityMutationResponse>> CreateOrUpdateEntityAsync(string collection, AtlasEntityWithExtInfo entity, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNullOrEmpty(collection, nameof(collection));
-            Argument.AssertNotNull(content, nameof(content));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewCollections.CreateOrUpdateEntity");
+            using var scope = _clientDiagnostics.CreateScope("PurviewCollections.CreateOrUpdateEntity");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateCreateOrUpdateEntityRequest(collection, content, context);
-                return await _pipeline.ProcessMessageAsync(message, context).ConfigureAwait(false);
+                return await RestClient.CreateOrUpdateEntityAsync(collection, entity, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -87,24 +91,15 @@ namespace Azure.Analytics.Purview.Catalog
         /// Map and array of collections are not well supported. E.g., array&lt;array&lt;int&gt;&gt;, array&lt;map&lt;string, int&gt;&gt;.
         /// </summary>
         /// <param name="collection"> the collection unique name. </param>
-        /// <param name="content"> The content to send as the body of the request. Details of the request body schema are in the Remarks section below. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="collection"/> or <paramref name="content"/> is null. </exception>
-        /// <exception cref="ArgumentException"> <paramref name="collection"/> is an empty string, and was expected to be non-empty. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewCollections.xml" path="doc/members/member[@name='CreateOrUpdateEntity(String,RequestContent,RequestContext)']/*" />
-        public virtual Response CreateOrUpdateEntity(string collection, RequestContent content, RequestContext context = null)
+        /// <param name="entity"> Atlas entity with extended information. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual Response<EntityMutationResponse> CreateOrUpdateEntity(string collection, AtlasEntityWithExtInfo entity, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNullOrEmpty(collection, nameof(collection));
-            Argument.AssertNotNull(content, nameof(content));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewCollections.CreateOrUpdateEntity");
+            using var scope = _clientDiagnostics.CreateScope("PurviewCollections.CreateOrUpdateEntity");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateCreateOrUpdateEntityRequest(collection, content, context);
-                return _pipeline.ProcessMessage(message, context);
+                return RestClient.CreateOrUpdateEntity(collection, entity, cancellationToken);
             }
             catch (Exception e)
             {
@@ -119,24 +114,15 @@ namespace Azure.Analytics.Purview.Catalog
         /// Map and array of collections are not well supported. E.g., array&lt;array&lt;int&gt;&gt;, array&lt;map&lt;string, int&gt;&gt;.
         /// </summary>
         /// <param name="collection"> the collection unique name. </param>
-        /// <param name="content"> The content to send as the body of the request. Details of the request body schema are in the Remarks section below. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="collection"/> or <paramref name="content"/> is null. </exception>
-        /// <exception cref="ArgumentException"> <paramref name="collection"/> is an empty string, and was expected to be non-empty. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewCollections.xml" path="doc/members/member[@name='CreateOrUpdateEntityInBulkAsync(String,RequestContent,RequestContext)']/*" />
-        public virtual async Task<Response> CreateOrUpdateEntityInBulkAsync(string collection, RequestContent content, RequestContext context = null)
+        /// <param name="entities"> Atlas entities with extended information. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual async Task<Response<EntityMutationResponse>> CreateOrUpdateEntityInBulkAsync(string collection, AtlasEntitiesWithExtInfo entities, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNullOrEmpty(collection, nameof(collection));
-            Argument.AssertNotNull(content, nameof(content));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewCollections.CreateOrUpdateEntityInBulk");
+            using var scope = _clientDiagnostics.CreateScope("PurviewCollections.CreateOrUpdateEntityInBulk");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateCreateOrUpdateEntityInBulkRequest(collection, content, context);
-                return await _pipeline.ProcessMessageAsync(message, context).ConfigureAwait(false);
+                return await RestClient.CreateOrUpdateEntityInBulkAsync(collection, entities, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -151,24 +137,15 @@ namespace Azure.Analytics.Purview.Catalog
         /// Map and array of collections are not well supported. E.g., array&lt;array&lt;int&gt;&gt;, array&lt;map&lt;string, int&gt;&gt;.
         /// </summary>
         /// <param name="collection"> the collection unique name. </param>
-        /// <param name="content"> The content to send as the body of the request. Details of the request body schema are in the Remarks section below. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="collection"/> or <paramref name="content"/> is null. </exception>
-        /// <exception cref="ArgumentException"> <paramref name="collection"/> is an empty string, and was expected to be non-empty. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewCollections.xml" path="doc/members/member[@name='CreateOrUpdateEntityInBulk(String,RequestContent,RequestContext)']/*" />
-        public virtual Response CreateOrUpdateEntityInBulk(string collection, RequestContent content, RequestContext context = null)
+        /// <param name="entities"> Atlas entities with extended information. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual Response<EntityMutationResponse> CreateOrUpdateEntityInBulk(string collection, AtlasEntitiesWithExtInfo entities, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNullOrEmpty(collection, nameof(collection));
-            Argument.AssertNotNull(content, nameof(content));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewCollections.CreateOrUpdateEntityInBulk");
+            using var scope = _clientDiagnostics.CreateScope("PurviewCollections.CreateOrUpdateEntityInBulk");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateCreateOrUpdateEntityInBulkRequest(collection, content, context);
-                return _pipeline.ProcessMessage(message, context);
+                return RestClient.CreateOrUpdateEntityInBulk(collection, entities, cancellationToken);
             }
             catch (Exception e)
             {
@@ -179,24 +156,15 @@ namespace Azure.Analytics.Purview.Catalog
 
         /// <summary> Move existing entities to the target collection. </summary>
         /// <param name="collection"> the collection unique name. </param>
-        /// <param name="content"> The content to send as the body of the request. Details of the request body schema are in the Remarks section below. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="collection"/> or <paramref name="content"/> is null. </exception>
-        /// <exception cref="ArgumentException"> <paramref name="collection"/> is an empty string, and was expected to be non-empty. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewCollections.xml" path="doc/members/member[@name='MoveEntitiesToCollectionAsync(String,RequestContent,RequestContext)']/*" />
-        public virtual async Task<Response> MoveEntitiesToCollectionAsync(string collection, RequestContent content, RequestContext context = null)
+        /// <param name="moveEntitiesRequest"> Entity guids to be moved to target collection. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual async Task<Response<EntityMutationResponse>> MoveEntitiesToCollectionAsync(string collection, MoveEntitiesRequest moveEntitiesRequest, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNullOrEmpty(collection, nameof(collection));
-            Argument.AssertNotNull(content, nameof(content));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewCollections.MoveEntitiesToCollection");
+            using var scope = _clientDiagnostics.CreateScope("PurviewCollections.MoveEntitiesToCollection");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateMoveEntitiesToCollectionRequest(collection, content, context);
-                return await _pipeline.ProcessMessageAsync(message, context).ConfigureAwait(false);
+                return await RestClient.MoveEntitiesToCollectionAsync(collection, moveEntitiesRequest, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -207,24 +175,15 @@ namespace Azure.Analytics.Purview.Catalog
 
         /// <summary> Move existing entities to the target collection. </summary>
         /// <param name="collection"> the collection unique name. </param>
-        /// <param name="content"> The content to send as the body of the request. Details of the request body schema are in the Remarks section below. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="collection"/> or <paramref name="content"/> is null. </exception>
-        /// <exception cref="ArgumentException"> <paramref name="collection"/> is an empty string, and was expected to be non-empty. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewCollections.xml" path="doc/members/member[@name='MoveEntitiesToCollection(String,RequestContent,RequestContext)']/*" />
-        public virtual Response MoveEntitiesToCollection(string collection, RequestContent content, RequestContext context = null)
+        /// <param name="moveEntitiesRequest"> Entity guids to be moved to target collection. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual Response<EntityMutationResponse> MoveEntitiesToCollection(string collection, MoveEntitiesRequest moveEntitiesRequest, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNullOrEmpty(collection, nameof(collection));
-            Argument.AssertNotNull(content, nameof(content));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewCollections.MoveEntitiesToCollection");
+            using var scope = _clientDiagnostics.CreateScope("PurviewCollections.MoveEntitiesToCollection");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateMoveEntitiesToCollectionRequest(collection, content, context);
-                return _pipeline.ProcessMessage(message, context);
+                return RestClient.MoveEntitiesToCollection(collection, moveEntitiesRequest, cancellationToken);
             }
             catch (Exception e)
             {
@@ -232,65 +191,5 @@ namespace Azure.Analytics.Purview.Catalog
                 throw;
             }
         }
-
-        internal HttpMessage CreateCreateOrUpdateEntityRequest(string collection, RequestContent content, RequestContext context)
-        {
-            var message = _pipeline.CreateMessage(context, ResponseClassifier200);
-            var request = message.Request;
-            request.Method = RequestMethod.Post;
-            var uri = new RawRequestUriBuilder();
-            uri.Reset(_endpoint);
-            uri.AppendRaw("/catalog/api", false);
-            uri.AppendPath("/collections/", false);
-            uri.AppendPath(collection, true);
-            uri.AppendPath("/entity", false);
-            uri.AppendQuery("api-version", _apiVersion, true);
-            request.Uri = uri;
-            request.Headers.Add("Accept", "application/json");
-            request.Headers.Add("Content-Type", "application/json");
-            request.Content = content;
-            return message;
-        }
-
-        internal HttpMessage CreateCreateOrUpdateEntityInBulkRequest(string collection, RequestContent content, RequestContext context)
-        {
-            var message = _pipeline.CreateMessage(context, ResponseClassifier200);
-            var request = message.Request;
-            request.Method = RequestMethod.Post;
-            var uri = new RawRequestUriBuilder();
-            uri.Reset(_endpoint);
-            uri.AppendRaw("/catalog/api", false);
-            uri.AppendPath("/collections/", false);
-            uri.AppendPath(collection, true);
-            uri.AppendPath("/entity/bulk", false);
-            uri.AppendQuery("api-version", _apiVersion, true);
-            request.Uri = uri;
-            request.Headers.Add("Accept", "application/json");
-            request.Headers.Add("Content-Type", "application/json");
-            request.Content = content;
-            return message;
-        }
-
-        internal HttpMessage CreateMoveEntitiesToCollectionRequest(string collection, RequestContent content, RequestContext context)
-        {
-            var message = _pipeline.CreateMessage(context, ResponseClassifier200);
-            var request = message.Request;
-            request.Method = RequestMethod.Post;
-            var uri = new RawRequestUriBuilder();
-            uri.Reset(_endpoint);
-            uri.AppendRaw("/catalog/api", false);
-            uri.AppendPath("/collections/", false);
-            uri.AppendPath(collection, true);
-            uri.AppendPath("/entity/moveHere", false);
-            uri.AppendQuery("api-version", _apiVersion, true);
-            request.Uri = uri;
-            request.Headers.Add("Accept", "application/json");
-            request.Headers.Add("Content-Type", "application/json");
-            request.Content = content;
-            return message;
-        }
-
-        private static ResponseClassifier _responseClassifier200;
-        private static ResponseClassifier ResponseClassifier200 => _responseClassifier200 ??= new StatusCodeClassifier(stackalloc ushort[] { 200 });
     }
 }

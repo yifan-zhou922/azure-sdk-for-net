@@ -6,28 +6,22 @@
 #nullable disable
 
 using System;
+using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Azure;
+using Azure.Analytics.Purview.Catalog.Models;
 using Azure.Core;
 using Azure.Core.Pipeline;
 
 namespace Azure.Analytics.Purview.Catalog
 {
-    // Data plane generated sub-client.
-    /// <summary> The PurviewTypes sub-client. </summary>
+    /// <summary> The PurviewTypes service client. </summary>
     public partial class PurviewTypes
     {
-        private static readonly string[] AuthorizationScopes = new string[] { "https://purview.azure.net/.default" };
-        private readonly TokenCredential _tokenCredential;
+        private readonly ClientDiagnostics _clientDiagnostics;
         private readonly HttpPipeline _pipeline;
-        private readonly Uri _endpoint;
-        private readonly string _apiVersion;
-
-        /// <summary> The ClientDiagnostics is used to provide tracing support for the client library. </summary>
-        internal ClientDiagnostics ClientDiagnostics { get; }
-
-        /// <summary> The HTTP pipeline for sending and receiving REST requests and responses. </summary>
-        public virtual HttpPipeline Pipeline => _pipeline;
+        internal PurviewTypesRestClient RestClient { get; }
 
         /// <summary> Initializes a new instance of PurviewTypes for mocking. </summary>
         protected PurviewTypes()
@@ -35,38 +29,50 @@ namespace Azure.Analytics.Purview.Catalog
         }
 
         /// <summary> Initializes a new instance of PurviewTypes. </summary>
+        /// <param name="endpoint"> The catalog endpoint of your Purview account. Example: https://{accountName}.purview.azure.com. </param>
+        /// <param name="credential"> A credential used to authenticate to an Azure Service. </param>
+        /// <param name="options"> The options for configuring the client. </param>
+        public PurviewTypes(Uri endpoint, TokenCredential credential, PurviewCatalogServiceRestAPIDocumentClientOptions options = null)
+        {
+            if (endpoint == null)
+            {
+                throw new ArgumentNullException(nameof(endpoint));
+            }
+            if (credential == null)
+            {
+                throw new ArgumentNullException(nameof(credential));
+            }
+
+            options ??= new PurviewCatalogServiceRestAPIDocumentClientOptions();
+            _clientDiagnostics = new ClientDiagnostics(options);
+            string[] scopes = { "https://purview.azure.net/.default" };
+            _pipeline = HttpPipelineBuilder.Build(options, new BearerTokenAuthenticationPolicy(credential, scopes));
+            RestClient = new PurviewTypesRestClient(_clientDiagnostics, _pipeline, endpoint, options.Version);
+        }
+
+        /// <summary> Initializes a new instance of PurviewTypes. </summary>
         /// <param name="clientDiagnostics"> The handler for diagnostic messaging in the client. </param>
         /// <param name="pipeline"> The HTTP pipeline for sending and receiving REST requests and responses. </param>
-        /// <param name="tokenCredential"> The token credential to copy. </param>
         /// <param name="endpoint"> The catalog endpoint of your Purview account. Example: https://{accountName}.purview.azure.com. </param>
         /// <param name="apiVersion"> Api Version. </param>
-        internal PurviewTypes(ClientDiagnostics clientDiagnostics, HttpPipeline pipeline, TokenCredential tokenCredential, Uri endpoint, string apiVersion)
+        /// <exception cref="ArgumentNullException"> <paramref name="clientDiagnostics"/>, <paramref name="pipeline"/>, <paramref name="endpoint"/> or <paramref name="apiVersion"/> is null. </exception>
+        internal PurviewTypes(ClientDiagnostics clientDiagnostics, HttpPipeline pipeline, Uri endpoint, string apiVersion = "2022-03-01-preview")
         {
-            ClientDiagnostics = clientDiagnostics;
+            RestClient = new PurviewTypesRestClient(clientDiagnostics, pipeline, endpoint, apiVersion);
+            _clientDiagnostics = clientDiagnostics;
             _pipeline = pipeline;
-            _tokenCredential = tokenCredential;
-            _endpoint = endpoint;
-            _apiVersion = apiVersion;
         }
 
         /// <summary> Get the businessMetadata definition for the given guid. </summary>
         /// <param name="guid"> businessMetadata guid. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="guid"/> is null. </exception>
-        /// <exception cref="ArgumentException"> <paramref name="guid"/> is an empty string, and was expected to be non-empty. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewTypes.xml" path="doc/members/member[@name='GetBusinessMetadataDefByGuidAsync(String,RequestContext)']/*" />
-        public virtual async Task<Response> GetBusinessMetadataDefByGuidAsync(string guid, RequestContext context = null)
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual async Task<Response<AtlasBusinessMetadataDef>> GetBusinessMetadataDefByGuidAsync(string guid, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNullOrEmpty(guid, nameof(guid));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewTypes.GetBusinessMetadataDefByGuid");
+            using var scope = _clientDiagnostics.CreateScope("PurviewTypes.GetBusinessMetadataDefByGuid");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateGetBusinessMetadataDefByGuidRequest(guid, context);
-                return await _pipeline.ProcessMessageAsync(message, context).ConfigureAwait(false);
+                return await RestClient.GetBusinessMetadataDefByGuidAsync(guid, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -77,22 +83,14 @@ namespace Azure.Analytics.Purview.Catalog
 
         /// <summary> Get the businessMetadata definition for the given guid. </summary>
         /// <param name="guid"> businessMetadata guid. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="guid"/> is null. </exception>
-        /// <exception cref="ArgumentException"> <paramref name="guid"/> is an empty string, and was expected to be non-empty. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewTypes.xml" path="doc/members/member[@name='GetBusinessMetadataDefByGuid(String,RequestContext)']/*" />
-        public virtual Response GetBusinessMetadataDefByGuid(string guid, RequestContext context = null)
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual Response<AtlasBusinessMetadataDef> GetBusinessMetadataDefByGuid(string guid, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNullOrEmpty(guid, nameof(guid));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewTypes.GetBusinessMetadataDefByGuid");
+            using var scope = _clientDiagnostics.CreateScope("PurviewTypes.GetBusinessMetadataDefByGuid");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateGetBusinessMetadataDefByGuidRequest(guid, context);
-                return _pipeline.ProcessMessage(message, context);
+                return RestClient.GetBusinessMetadataDefByGuid(guid, cancellationToken);
             }
             catch (Exception e)
             {
@@ -103,22 +101,14 @@ namespace Azure.Analytics.Purview.Catalog
 
         /// <summary> Get the businessMetadata definition by it&apos;s name (unique). </summary>
         /// <param name="name"> businessMetadata name. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="name"/> is null. </exception>
-        /// <exception cref="ArgumentException"> <paramref name="name"/> is an empty string, and was expected to be non-empty. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewTypes.xml" path="doc/members/member[@name='GetBusinessMetadataDefByNameAsync(String,RequestContext)']/*" />
-        public virtual async Task<Response> GetBusinessMetadataDefByNameAsync(string name, RequestContext context = null)
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual async Task<Response<AtlasBusinessMetadataDef>> GetBusinessMetadataDefByNameAsync(string name, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNullOrEmpty(name, nameof(name));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewTypes.GetBusinessMetadataDefByName");
+            using var scope = _clientDiagnostics.CreateScope("PurviewTypes.GetBusinessMetadataDefByName");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateGetBusinessMetadataDefByNameRequest(name, context);
-                return await _pipeline.ProcessMessageAsync(message, context).ConfigureAwait(false);
+                return await RestClient.GetBusinessMetadataDefByNameAsync(name, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -129,22 +119,14 @@ namespace Azure.Analytics.Purview.Catalog
 
         /// <summary> Get the businessMetadata definition by it&apos;s name (unique). </summary>
         /// <param name="name"> businessMetadata name. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="name"/> is null. </exception>
-        /// <exception cref="ArgumentException"> <paramref name="name"/> is an empty string, and was expected to be non-empty. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewTypes.xml" path="doc/members/member[@name='GetBusinessMetadataDefByName(String,RequestContext)']/*" />
-        public virtual Response GetBusinessMetadataDefByName(string name, RequestContext context = null)
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual Response<AtlasBusinessMetadataDef> GetBusinessMetadataDefByName(string name, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNullOrEmpty(name, nameof(name));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewTypes.GetBusinessMetadataDefByName");
+            using var scope = _clientDiagnostics.CreateScope("PurviewTypes.GetBusinessMetadataDefByName");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateGetBusinessMetadataDefByNameRequest(name, context);
-                return _pipeline.ProcessMessage(message, context);
+                return RestClient.GetBusinessMetadataDefByName(name, cancellationToken);
             }
             catch (Exception e)
             {
@@ -155,22 +137,14 @@ namespace Azure.Analytics.Purview.Catalog
 
         /// <summary> Get the classification definition for the given GUID. </summary>
         /// <param name="guid"> The globally unique identifier of the classification. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="guid"/> is null. </exception>
-        /// <exception cref="ArgumentException"> <paramref name="guid"/> is an empty string, and was expected to be non-empty. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewTypes.xml" path="doc/members/member[@name='GetClassificationDefByGuidAsync(String,RequestContext)']/*" />
-        public virtual async Task<Response> GetClassificationDefByGuidAsync(string guid, RequestContext context = null)
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual async Task<Response<AtlasClassificationDef>> GetClassificationDefByGuidAsync(string guid, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNullOrEmpty(guid, nameof(guid));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewTypes.GetClassificationDefByGuid");
+            using var scope = _clientDiagnostics.CreateScope("PurviewTypes.GetClassificationDefByGuid");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateGetClassificationDefByGuidRequest(guid, context);
-                return await _pipeline.ProcessMessageAsync(message, context).ConfigureAwait(false);
+                return await RestClient.GetClassificationDefByGuidAsync(guid, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -181,22 +155,14 @@ namespace Azure.Analytics.Purview.Catalog
 
         /// <summary> Get the classification definition for the given GUID. </summary>
         /// <param name="guid"> The globally unique identifier of the classification. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="guid"/> is null. </exception>
-        /// <exception cref="ArgumentException"> <paramref name="guid"/> is an empty string, and was expected to be non-empty. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewTypes.xml" path="doc/members/member[@name='GetClassificationDefByGuid(String,RequestContext)']/*" />
-        public virtual Response GetClassificationDefByGuid(string guid, RequestContext context = null)
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual Response<AtlasClassificationDef> GetClassificationDefByGuid(string guid, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNullOrEmpty(guid, nameof(guid));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewTypes.GetClassificationDefByGuid");
+            using var scope = _clientDiagnostics.CreateScope("PurviewTypes.GetClassificationDefByGuid");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateGetClassificationDefByGuidRequest(guid, context);
-                return _pipeline.ProcessMessage(message, context);
+                return RestClient.GetClassificationDefByGuid(guid, cancellationToken);
             }
             catch (Exception e)
             {
@@ -207,22 +173,14 @@ namespace Azure.Analytics.Purview.Catalog
 
         /// <summary> Get the classification definition by its name (unique). </summary>
         /// <param name="name"> The name of the classification. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="name"/> is null. </exception>
-        /// <exception cref="ArgumentException"> <paramref name="name"/> is an empty string, and was expected to be non-empty. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewTypes.xml" path="doc/members/member[@name='GetClassificationDefByNameAsync(String,RequestContext)']/*" />
-        public virtual async Task<Response> GetClassificationDefByNameAsync(string name, RequestContext context = null)
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual async Task<Response<AtlasClassificationDef>> GetClassificationDefByNameAsync(string name, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNullOrEmpty(name, nameof(name));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewTypes.GetClassificationDefByName");
+            using var scope = _clientDiagnostics.CreateScope("PurviewTypes.GetClassificationDefByName");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateGetClassificationDefByNameRequest(name, context);
-                return await _pipeline.ProcessMessageAsync(message, context).ConfigureAwait(false);
+                return await RestClient.GetClassificationDefByNameAsync(name, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -233,22 +191,14 @@ namespace Azure.Analytics.Purview.Catalog
 
         /// <summary> Get the classification definition by its name (unique). </summary>
         /// <param name="name"> The name of the classification. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="name"/> is null. </exception>
-        /// <exception cref="ArgumentException"> <paramref name="name"/> is an empty string, and was expected to be non-empty. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewTypes.xml" path="doc/members/member[@name='GetClassificationDefByName(String,RequestContext)']/*" />
-        public virtual Response GetClassificationDefByName(string name, RequestContext context = null)
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual Response<AtlasClassificationDef> GetClassificationDefByName(string name, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNullOrEmpty(name, nameof(name));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewTypes.GetClassificationDefByName");
+            using var scope = _clientDiagnostics.CreateScope("PurviewTypes.GetClassificationDefByName");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateGetClassificationDefByNameRequest(name, context);
-                return _pipeline.ProcessMessage(message, context);
+                return RestClient.GetClassificationDefByName(name, cancellationToken);
             }
             catch (Exception e)
             {
@@ -259,22 +209,14 @@ namespace Azure.Analytics.Purview.Catalog
 
         /// <summary> Get the Entity definition for the given GUID. </summary>
         /// <param name="guid"> The globally unique identifier of the entity. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="guid"/> is null. </exception>
-        /// <exception cref="ArgumentException"> <paramref name="guid"/> is an empty string, and was expected to be non-empty. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewTypes.xml" path="doc/members/member[@name='GetEntityDefinitionByGuidAsync(String,RequestContext)']/*" />
-        public virtual async Task<Response> GetEntityDefinitionByGuidAsync(string guid, RequestContext context = null)
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual async Task<Response<AtlasEntityDef>> GetEntityDefinitionByGuidAsync(string guid, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNullOrEmpty(guid, nameof(guid));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewTypes.GetEntityDefinitionByGuid");
+            using var scope = _clientDiagnostics.CreateScope("PurviewTypes.GetEntityDefinitionByGuid");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateGetEntityDefinitionByGuidRequest(guid, context);
-                return await _pipeline.ProcessMessageAsync(message, context).ConfigureAwait(false);
+                return await RestClient.GetEntityDefinitionByGuidAsync(guid, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -285,22 +227,14 @@ namespace Azure.Analytics.Purview.Catalog
 
         /// <summary> Get the Entity definition for the given GUID. </summary>
         /// <param name="guid"> The globally unique identifier of the entity. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="guid"/> is null. </exception>
-        /// <exception cref="ArgumentException"> <paramref name="guid"/> is an empty string, and was expected to be non-empty. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewTypes.xml" path="doc/members/member[@name='GetEntityDefinitionByGuid(String,RequestContext)']/*" />
-        public virtual Response GetEntityDefinitionByGuid(string guid, RequestContext context = null)
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual Response<AtlasEntityDef> GetEntityDefinitionByGuid(string guid, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNullOrEmpty(guid, nameof(guid));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewTypes.GetEntityDefinitionByGuid");
+            using var scope = _clientDiagnostics.CreateScope("PurviewTypes.GetEntityDefinitionByGuid");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateGetEntityDefinitionByGuidRequest(guid, context);
-                return _pipeline.ProcessMessage(message, context);
+                return RestClient.GetEntityDefinitionByGuid(guid, cancellationToken);
             }
             catch (Exception e)
             {
@@ -311,22 +245,14 @@ namespace Azure.Analytics.Purview.Catalog
 
         /// <summary> Get the entity definition by its name (unique). </summary>
         /// <param name="name"> The name of the entity. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="name"/> is null. </exception>
-        /// <exception cref="ArgumentException"> <paramref name="name"/> is an empty string, and was expected to be non-empty. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewTypes.xml" path="doc/members/member[@name='GetEntityDefinitionByNameAsync(String,RequestContext)']/*" />
-        public virtual async Task<Response> GetEntityDefinitionByNameAsync(string name, RequestContext context = null)
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual async Task<Response<AtlasEntityDef>> GetEntityDefinitionByNameAsync(string name, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNullOrEmpty(name, nameof(name));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewTypes.GetEntityDefinitionByName");
+            using var scope = _clientDiagnostics.CreateScope("PurviewTypes.GetEntityDefinitionByName");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateGetEntityDefinitionByNameRequest(name, context);
-                return await _pipeline.ProcessMessageAsync(message, context).ConfigureAwait(false);
+                return await RestClient.GetEntityDefinitionByNameAsync(name, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -337,22 +263,14 @@ namespace Azure.Analytics.Purview.Catalog
 
         /// <summary> Get the entity definition by its name (unique). </summary>
         /// <param name="name"> The name of the entity. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="name"/> is null. </exception>
-        /// <exception cref="ArgumentException"> <paramref name="name"/> is an empty string, and was expected to be non-empty. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewTypes.xml" path="doc/members/member[@name='GetEntityDefinitionByName(String,RequestContext)']/*" />
-        public virtual Response GetEntityDefinitionByName(string name, RequestContext context = null)
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual Response<AtlasEntityDef> GetEntityDefinitionByName(string name, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNullOrEmpty(name, nameof(name));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewTypes.GetEntityDefinitionByName");
+            using var scope = _clientDiagnostics.CreateScope("PurviewTypes.GetEntityDefinitionByName");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateGetEntityDefinitionByNameRequest(name, context);
-                return _pipeline.ProcessMessage(message, context);
+                return RestClient.GetEntityDefinitionByName(name, cancellationToken);
             }
             catch (Exception e)
             {
@@ -363,22 +281,14 @@ namespace Azure.Analytics.Purview.Catalog
 
         /// <summary> Get the enum definition for the given GUID. </summary>
         /// <param name="guid"> The globally unique identifier of the enum. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="guid"/> is null. </exception>
-        /// <exception cref="ArgumentException"> <paramref name="guid"/> is an empty string, and was expected to be non-empty. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewTypes.xml" path="doc/members/member[@name='GetEnumDefByGuidAsync(String,RequestContext)']/*" />
-        public virtual async Task<Response> GetEnumDefByGuidAsync(string guid, RequestContext context = null)
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual async Task<Response<AtlasEnumDef>> GetEnumDefByGuidAsync(string guid, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNullOrEmpty(guid, nameof(guid));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewTypes.GetEnumDefByGuid");
+            using var scope = _clientDiagnostics.CreateScope("PurviewTypes.GetEnumDefByGuid");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateGetEnumDefByGuidRequest(guid, context);
-                return await _pipeline.ProcessMessageAsync(message, context).ConfigureAwait(false);
+                return await RestClient.GetEnumDefByGuidAsync(guid, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -389,22 +299,14 @@ namespace Azure.Analytics.Purview.Catalog
 
         /// <summary> Get the enum definition for the given GUID. </summary>
         /// <param name="guid"> The globally unique identifier of the enum. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="guid"/> is null. </exception>
-        /// <exception cref="ArgumentException"> <paramref name="guid"/> is an empty string, and was expected to be non-empty. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewTypes.xml" path="doc/members/member[@name='GetEnumDefByGuid(String,RequestContext)']/*" />
-        public virtual Response GetEnumDefByGuid(string guid, RequestContext context = null)
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual Response<AtlasEnumDef> GetEnumDefByGuid(string guid, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNullOrEmpty(guid, nameof(guid));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewTypes.GetEnumDefByGuid");
+            using var scope = _clientDiagnostics.CreateScope("PurviewTypes.GetEnumDefByGuid");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateGetEnumDefByGuidRequest(guid, context);
-                return _pipeline.ProcessMessage(message, context);
+                return RestClient.GetEnumDefByGuid(guid, cancellationToken);
             }
             catch (Exception e)
             {
@@ -415,22 +317,14 @@ namespace Azure.Analytics.Purview.Catalog
 
         /// <summary> Get the enum definition by its name (unique). </summary>
         /// <param name="name"> The name of the enum. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="name"/> is null. </exception>
-        /// <exception cref="ArgumentException"> <paramref name="name"/> is an empty string, and was expected to be non-empty. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewTypes.xml" path="doc/members/member[@name='GetEnumDefByNameAsync(String,RequestContext)']/*" />
-        public virtual async Task<Response> GetEnumDefByNameAsync(string name, RequestContext context = null)
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual async Task<Response<AtlasEnumDef>> GetEnumDefByNameAsync(string name, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNullOrEmpty(name, nameof(name));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewTypes.GetEnumDefByName");
+            using var scope = _clientDiagnostics.CreateScope("PurviewTypes.GetEnumDefByName");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateGetEnumDefByNameRequest(name, context);
-                return await _pipeline.ProcessMessageAsync(message, context).ConfigureAwait(false);
+                return await RestClient.GetEnumDefByNameAsync(name, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -441,22 +335,14 @@ namespace Azure.Analytics.Purview.Catalog
 
         /// <summary> Get the enum definition by its name (unique). </summary>
         /// <param name="name"> The name of the enum. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="name"/> is null. </exception>
-        /// <exception cref="ArgumentException"> <paramref name="name"/> is an empty string, and was expected to be non-empty. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewTypes.xml" path="doc/members/member[@name='GetEnumDefByName(String,RequestContext)']/*" />
-        public virtual Response GetEnumDefByName(string name, RequestContext context = null)
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual Response<AtlasEnumDef> GetEnumDefByName(string name, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNullOrEmpty(name, nameof(name));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewTypes.GetEnumDefByName");
+            using var scope = _clientDiagnostics.CreateScope("PurviewTypes.GetEnumDefByName");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateGetEnumDefByNameRequest(name, context);
-                return _pipeline.ProcessMessage(message, context);
+                return RestClient.GetEnumDefByName(name, cancellationToken);
             }
             catch (Exception e)
             {
@@ -467,22 +353,14 @@ namespace Azure.Analytics.Purview.Catalog
 
         /// <summary> Get the relationship definition for the given GUID. </summary>
         /// <param name="guid"> The globally unique identifier of the relationship. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="guid"/> is null. </exception>
-        /// <exception cref="ArgumentException"> <paramref name="guid"/> is an empty string, and was expected to be non-empty. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewTypes.xml" path="doc/members/member[@name='GetRelationshipDefByGuidAsync(String,RequestContext)']/*" />
-        public virtual async Task<Response> GetRelationshipDefByGuidAsync(string guid, RequestContext context = null)
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual async Task<Response<AtlasRelationshipDef>> GetRelationshipDefByGuidAsync(string guid, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNullOrEmpty(guid, nameof(guid));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewTypes.GetRelationshipDefByGuid");
+            using var scope = _clientDiagnostics.CreateScope("PurviewTypes.GetRelationshipDefByGuid");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateGetRelationshipDefByGuidRequest(guid, context);
-                return await _pipeline.ProcessMessageAsync(message, context).ConfigureAwait(false);
+                return await RestClient.GetRelationshipDefByGuidAsync(guid, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -493,22 +371,14 @@ namespace Azure.Analytics.Purview.Catalog
 
         /// <summary> Get the relationship definition for the given GUID. </summary>
         /// <param name="guid"> The globally unique identifier of the relationship. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="guid"/> is null. </exception>
-        /// <exception cref="ArgumentException"> <paramref name="guid"/> is an empty string, and was expected to be non-empty. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewTypes.xml" path="doc/members/member[@name='GetRelationshipDefByGuid(String,RequestContext)']/*" />
-        public virtual Response GetRelationshipDefByGuid(string guid, RequestContext context = null)
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual Response<AtlasRelationshipDef> GetRelationshipDefByGuid(string guid, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNullOrEmpty(guid, nameof(guid));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewTypes.GetRelationshipDefByGuid");
+            using var scope = _clientDiagnostics.CreateScope("PurviewTypes.GetRelationshipDefByGuid");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateGetRelationshipDefByGuidRequest(guid, context);
-                return _pipeline.ProcessMessage(message, context);
+                return RestClient.GetRelationshipDefByGuid(guid, cancellationToken);
             }
             catch (Exception e)
             {
@@ -519,22 +389,14 @@ namespace Azure.Analytics.Purview.Catalog
 
         /// <summary> Get the relationship definition by its name (unique). </summary>
         /// <param name="name"> The name of the relationship. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="name"/> is null. </exception>
-        /// <exception cref="ArgumentException"> <paramref name="name"/> is an empty string, and was expected to be non-empty. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewTypes.xml" path="doc/members/member[@name='GetRelationshipDefByNameAsync(String,RequestContext)']/*" />
-        public virtual async Task<Response> GetRelationshipDefByNameAsync(string name, RequestContext context = null)
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual async Task<Response<AtlasRelationshipDef>> GetRelationshipDefByNameAsync(string name, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNullOrEmpty(name, nameof(name));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewTypes.GetRelationshipDefByName");
+            using var scope = _clientDiagnostics.CreateScope("PurviewTypes.GetRelationshipDefByName");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateGetRelationshipDefByNameRequest(name, context);
-                return await _pipeline.ProcessMessageAsync(message, context).ConfigureAwait(false);
+                return await RestClient.GetRelationshipDefByNameAsync(name, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -545,22 +407,14 @@ namespace Azure.Analytics.Purview.Catalog
 
         /// <summary> Get the relationship definition by its name (unique). </summary>
         /// <param name="name"> The name of the relationship. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="name"/> is null. </exception>
-        /// <exception cref="ArgumentException"> <paramref name="name"/> is an empty string, and was expected to be non-empty. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewTypes.xml" path="doc/members/member[@name='GetRelationshipDefByName(String,RequestContext)']/*" />
-        public virtual Response GetRelationshipDefByName(string name, RequestContext context = null)
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual Response<AtlasRelationshipDef> GetRelationshipDefByName(string name, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNullOrEmpty(name, nameof(name));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewTypes.GetRelationshipDefByName");
+            using var scope = _clientDiagnostics.CreateScope("PurviewTypes.GetRelationshipDefByName");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateGetRelationshipDefByNameRequest(name, context);
-                return _pipeline.ProcessMessage(message, context);
+                return RestClient.GetRelationshipDefByName(name, cancellationToken);
             }
             catch (Exception e)
             {
@@ -571,22 +425,14 @@ namespace Azure.Analytics.Purview.Catalog
 
         /// <summary> Get the struct definition for the given GUID. </summary>
         /// <param name="guid"> The globally unique identifier of the struct. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="guid"/> is null. </exception>
-        /// <exception cref="ArgumentException"> <paramref name="guid"/> is an empty string, and was expected to be non-empty. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewTypes.xml" path="doc/members/member[@name='GetStructDefByGuidAsync(String,RequestContext)']/*" />
-        public virtual async Task<Response> GetStructDefByGuidAsync(string guid, RequestContext context = null)
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual async Task<Response<AtlasStructDef>> GetStructDefByGuidAsync(string guid, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNullOrEmpty(guid, nameof(guid));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewTypes.GetStructDefByGuid");
+            using var scope = _clientDiagnostics.CreateScope("PurviewTypes.GetStructDefByGuid");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateGetStructDefByGuidRequest(guid, context);
-                return await _pipeline.ProcessMessageAsync(message, context).ConfigureAwait(false);
+                return await RestClient.GetStructDefByGuidAsync(guid, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -597,22 +443,14 @@ namespace Azure.Analytics.Purview.Catalog
 
         /// <summary> Get the struct definition for the given GUID. </summary>
         /// <param name="guid"> The globally unique identifier of the struct. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="guid"/> is null. </exception>
-        /// <exception cref="ArgumentException"> <paramref name="guid"/> is an empty string, and was expected to be non-empty. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewTypes.xml" path="doc/members/member[@name='GetStructDefByGuid(String,RequestContext)']/*" />
-        public virtual Response GetStructDefByGuid(string guid, RequestContext context = null)
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual Response<AtlasStructDef> GetStructDefByGuid(string guid, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNullOrEmpty(guid, nameof(guid));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewTypes.GetStructDefByGuid");
+            using var scope = _clientDiagnostics.CreateScope("PurviewTypes.GetStructDefByGuid");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateGetStructDefByGuidRequest(guid, context);
-                return _pipeline.ProcessMessage(message, context);
+                return RestClient.GetStructDefByGuid(guid, cancellationToken);
             }
             catch (Exception e)
             {
@@ -623,22 +461,14 @@ namespace Azure.Analytics.Purview.Catalog
 
         /// <summary> Get the struct definition by its name (unique). </summary>
         /// <param name="name"> The name of the struct. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="name"/> is null. </exception>
-        /// <exception cref="ArgumentException"> <paramref name="name"/> is an empty string, and was expected to be non-empty. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewTypes.xml" path="doc/members/member[@name='GetStructDefByNameAsync(String,RequestContext)']/*" />
-        public virtual async Task<Response> GetStructDefByNameAsync(string name, RequestContext context = null)
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual async Task<Response<AtlasStructDef>> GetStructDefByNameAsync(string name, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNullOrEmpty(name, nameof(name));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewTypes.GetStructDefByName");
+            using var scope = _clientDiagnostics.CreateScope("PurviewTypes.GetStructDefByName");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateGetStructDefByNameRequest(name, context);
-                return await _pipeline.ProcessMessageAsync(message, context).ConfigureAwait(false);
+                return await RestClient.GetStructDefByNameAsync(name, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -649,22 +479,14 @@ namespace Azure.Analytics.Purview.Catalog
 
         /// <summary> Get the struct definition by its name (unique). </summary>
         /// <param name="name"> The name of the struct. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="name"/> is null. </exception>
-        /// <exception cref="ArgumentException"> <paramref name="name"/> is an empty string, and was expected to be non-empty. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewTypes.xml" path="doc/members/member[@name='GetStructDefByName(String,RequestContext)']/*" />
-        public virtual Response GetStructDefByName(string name, RequestContext context = null)
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual Response<AtlasStructDef> GetStructDefByName(string name, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNullOrEmpty(name, nameof(name));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewTypes.GetStructDefByName");
+            using var scope = _clientDiagnostics.CreateScope("PurviewTypes.GetStructDefByName");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateGetStructDefByNameRequest(name, context);
-                return _pipeline.ProcessMessage(message, context);
+                return RestClient.GetStructDefByName(name, cancellationToken);
             }
             catch (Exception e)
             {
@@ -675,22 +497,14 @@ namespace Azure.Analytics.Purview.Catalog
 
         /// <summary> Get the type definition for the given GUID. </summary>
         /// <param name="guid"> The globally unique identifier of the type. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="guid"/> is null. </exception>
-        /// <exception cref="ArgumentException"> <paramref name="guid"/> is an empty string, and was expected to be non-empty. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewTypes.xml" path="doc/members/member[@name='GetTypeDefinitionByGuidAsync(String,RequestContext)']/*" />
-        public virtual async Task<Response> GetTypeDefinitionByGuidAsync(string guid, RequestContext context = null)
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual async Task<Response<AtlasTypeDef>> GetTypeDefinitionByGuidAsync(string guid, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNullOrEmpty(guid, nameof(guid));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewTypes.GetTypeDefinitionByGuid");
+            using var scope = _clientDiagnostics.CreateScope("PurviewTypes.GetTypeDefinitionByGuid");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateGetTypeDefinitionByGuidRequest(guid, context);
-                return await _pipeline.ProcessMessageAsync(message, context).ConfigureAwait(false);
+                return await RestClient.GetTypeDefinitionByGuidAsync(guid, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -701,22 +515,14 @@ namespace Azure.Analytics.Purview.Catalog
 
         /// <summary> Get the type definition for the given GUID. </summary>
         /// <param name="guid"> The globally unique identifier of the type. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="guid"/> is null. </exception>
-        /// <exception cref="ArgumentException"> <paramref name="guid"/> is an empty string, and was expected to be non-empty. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewTypes.xml" path="doc/members/member[@name='GetTypeDefinitionByGuid(String,RequestContext)']/*" />
-        public virtual Response GetTypeDefinitionByGuid(string guid, RequestContext context = null)
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual Response<AtlasTypeDef> GetTypeDefinitionByGuid(string guid, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNullOrEmpty(guid, nameof(guid));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewTypes.GetTypeDefinitionByGuid");
+            using var scope = _clientDiagnostics.CreateScope("PurviewTypes.GetTypeDefinitionByGuid");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateGetTypeDefinitionByGuidRequest(guid, context);
-                return _pipeline.ProcessMessage(message, context);
+                return RestClient.GetTypeDefinitionByGuid(guid, cancellationToken);
             }
             catch (Exception e)
             {
@@ -727,22 +533,14 @@ namespace Azure.Analytics.Purview.Catalog
 
         /// <summary> Get the type definition by its name (unique). </summary>
         /// <param name="name"> The name of the type. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="name"/> is null. </exception>
-        /// <exception cref="ArgumentException"> <paramref name="name"/> is an empty string, and was expected to be non-empty. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewTypes.xml" path="doc/members/member[@name='GetTypeDefinitionByNameAsync(String,RequestContext)']/*" />
-        public virtual async Task<Response> GetTypeDefinitionByNameAsync(string name, RequestContext context = null)
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual async Task<Response<AtlasTypeDef>> GetTypeDefinitionByNameAsync(string name, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNullOrEmpty(name, nameof(name));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewTypes.GetTypeDefinitionByName");
+            using var scope = _clientDiagnostics.CreateScope("PurviewTypes.GetTypeDefinitionByName");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateGetTypeDefinitionByNameRequest(name, context);
-                return await _pipeline.ProcessMessageAsync(message, context).ConfigureAwait(false);
+                return await RestClient.GetTypeDefinitionByNameAsync(name, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -753,22 +551,14 @@ namespace Azure.Analytics.Purview.Catalog
 
         /// <summary> Get the type definition by its name (unique). </summary>
         /// <param name="name"> The name of the type. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="name"/> is null. </exception>
-        /// <exception cref="ArgumentException"> <paramref name="name"/> is an empty string, and was expected to be non-empty. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewTypes.xml" path="doc/members/member[@name='GetTypeDefinitionByName(String,RequestContext)']/*" />
-        public virtual Response GetTypeDefinitionByName(string name, RequestContext context = null)
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual Response<AtlasTypeDef> GetTypeDefinitionByName(string name, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNullOrEmpty(name, nameof(name));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewTypes.GetTypeDefinitionByName");
+            using var scope = _clientDiagnostics.CreateScope("PurviewTypes.GetTypeDefinitionByName");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateGetTypeDefinitionByNameRequest(name, context);
-                return _pipeline.ProcessMessage(message, context);
+                return RestClient.GetTypeDefinitionByName(name, cancellationToken);
             }
             catch (Exception e)
             {
@@ -779,22 +569,14 @@ namespace Azure.Analytics.Purview.Catalog
 
         /// <summary> Delete API for type identified by its name. </summary>
         /// <param name="name"> The name of the type. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="name"/> is null. </exception>
-        /// <exception cref="ArgumentException"> <paramref name="name"/> is an empty string, and was expected to be non-empty. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. </returns>
-        /// <include file="Docs/PurviewTypes.xml" path="doc/members/member[@name='DeleteTypeByNameAsync(String,RequestContext)']/*" />
-        public virtual async Task<Response> DeleteTypeByNameAsync(string name, RequestContext context = null)
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual async Task<Response> DeleteTypeByNameAsync(string name, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNullOrEmpty(name, nameof(name));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewTypes.DeleteTypeByName");
+            using var scope = _clientDiagnostics.CreateScope("PurviewTypes.DeleteTypeByName");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateDeleteTypeByNameRequest(name, context);
-                return await _pipeline.ProcessMessageAsync(message, context).ConfigureAwait(false);
+                return await RestClient.DeleteTypeByNameAsync(name, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -805,22 +587,14 @@ namespace Azure.Analytics.Purview.Catalog
 
         /// <summary> Delete API for type identified by its name. </summary>
         /// <param name="name"> The name of the type. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="name"/> is null. </exception>
-        /// <exception cref="ArgumentException"> <paramref name="name"/> is an empty string, and was expected to be non-empty. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. </returns>
-        /// <include file="Docs/PurviewTypes.xml" path="doc/members/member[@name='DeleteTypeByName(String,RequestContext)']/*" />
-        public virtual Response DeleteTypeByName(string name, RequestContext context = null)
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual Response DeleteTypeByName(string name, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNullOrEmpty(name, nameof(name));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewTypes.DeleteTypeByName");
+            using var scope = _clientDiagnostics.CreateScope("PurviewTypes.DeleteTypeByName");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateDeleteTypeByNameRequest(name, context);
-                return _pipeline.ProcessMessage(message, context);
+                return RestClient.DeleteTypeByName(name, cancellationToken);
             }
             catch (Exception e)
             {
@@ -834,19 +608,15 @@ namespace Azure.Analytics.Purview.Catalog
         /// Whether include termtemplatedef when return all typedefs.
         /// This is always true when search filter type=term_template
         /// </param>
-        /// <param name="type"> Typedef name as search filter when get typedefs. Allowed values: &quot;enum&quot; | &quot;entity&quot; | &quot;classification&quot; | &quot;relationship&quot; | &quot;struct&quot; | &quot;term_template&quot;. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewTypes.xml" path="doc/members/member[@name='GetAllTypeDefinitionsAsync(Boolean,String,RequestContext)']/*" />
-        public virtual async Task<Response> GetAllTypeDefinitionsAsync(bool? includeTermTemplate = null, string type = null, RequestContext context = null)
+        /// <param name="type"> Typedef name as search filter when get typedefs. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual async Task<Response<AtlasTypesDef>> GetAllTypeDefinitionsAsync(bool? includeTermTemplate = null, Models.Type? type = null, CancellationToken cancellationToken = default)
         {
-            using var scope = ClientDiagnostics.CreateScope("PurviewTypes.GetAllTypeDefinitions");
+            using var scope = _clientDiagnostics.CreateScope("PurviewTypes.GetAllTypeDefinitions");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateGetAllTypeDefinitionsRequest(includeTermTemplate, type, context);
-                return await _pipeline.ProcessMessageAsync(message, context).ConfigureAwait(false);
+                return await RestClient.GetAllTypeDefinitionsAsync(includeTermTemplate, type, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -860,19 +630,15 @@ namespace Azure.Analytics.Purview.Catalog
         /// Whether include termtemplatedef when return all typedefs.
         /// This is always true when search filter type=term_template
         /// </param>
-        /// <param name="type"> Typedef name as search filter when get typedefs. Allowed values: &quot;enum&quot; | &quot;entity&quot; | &quot;classification&quot; | &quot;relationship&quot; | &quot;struct&quot; | &quot;term_template&quot;. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewTypes.xml" path="doc/members/member[@name='GetAllTypeDefinitions(Boolean,String,RequestContext)']/*" />
-        public virtual Response GetAllTypeDefinitions(bool? includeTermTemplate = null, string type = null, RequestContext context = null)
+        /// <param name="type"> Typedef name as search filter when get typedefs. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual Response<AtlasTypesDef> GetAllTypeDefinitions(bool? includeTermTemplate = null, Models.Type? type = null, CancellationToken cancellationToken = default)
         {
-            using var scope = ClientDiagnostics.CreateScope("PurviewTypes.GetAllTypeDefinitions");
+            using var scope = _clientDiagnostics.CreateScope("PurviewTypes.GetAllTypeDefinitions");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateGetAllTypeDefinitionsRequest(includeTermTemplate, type, context);
-                return _pipeline.ProcessMessage(message, context);
+                return RestClient.GetAllTypeDefinitions(includeTermTemplate, type, cancellationToken);
             }
             catch (Exception e)
             {
@@ -885,22 +651,15 @@ namespace Azure.Analytics.Purview.Catalog
         /// Create all atlas type definitions in bulk, only new definitions will be created.
         /// Any changes to the existing definitions will be discarded.
         /// </summary>
-        /// <param name="content"> The content to send as the body of the request. Details of the request body schema are in the Remarks section below. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="content"/> is null. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewTypes.xml" path="doc/members/member[@name='CreateTypeDefinitionsAsync(RequestContent,RequestContext)']/*" />
-        public virtual async Task<Response> CreateTypeDefinitionsAsync(RequestContent content, RequestContext context = null)
+        /// <param name="typesDef"> A composite wrapper object with corresponding lists of the type definition. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual async Task<Response<AtlasTypesDef>> CreateTypeDefinitionsAsync(AtlasTypesDef typesDef, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNull(content, nameof(content));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewTypes.CreateTypeDefinitions");
+            using var scope = _clientDiagnostics.CreateScope("PurviewTypes.CreateTypeDefinitions");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateCreateTypeDefinitionsRequest(content, context);
-                return await _pipeline.ProcessMessageAsync(message, context).ConfigureAwait(false);
+                return await RestClient.CreateTypeDefinitionsAsync(typesDef, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -913,22 +672,15 @@ namespace Azure.Analytics.Purview.Catalog
         /// Create all atlas type definitions in bulk, only new definitions will be created.
         /// Any changes to the existing definitions will be discarded.
         /// </summary>
-        /// <param name="content"> The content to send as the body of the request. Details of the request body schema are in the Remarks section below. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="content"/> is null. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewTypes.xml" path="doc/members/member[@name='CreateTypeDefinitions(RequestContent,RequestContext)']/*" />
-        public virtual Response CreateTypeDefinitions(RequestContent content, RequestContext context = null)
+        /// <param name="typesDef"> A composite wrapper object with corresponding lists of the type definition. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual Response<AtlasTypesDef> CreateTypeDefinitions(AtlasTypesDef typesDef, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNull(content, nameof(content));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewTypes.CreateTypeDefinitions");
+            using var scope = _clientDiagnostics.CreateScope("PurviewTypes.CreateTypeDefinitions");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateCreateTypeDefinitionsRequest(content, context);
-                return _pipeline.ProcessMessage(message, context);
+                return RestClient.CreateTypeDefinitions(typesDef, cancellationToken);
             }
             catch (Exception e)
             {
@@ -938,22 +690,15 @@ namespace Azure.Analytics.Purview.Catalog
         }
 
         /// <summary> Update all types in bulk, changes detected in the type definitions would be persisted. </summary>
-        /// <param name="content"> The content to send as the body of the request. Details of the request body schema are in the Remarks section below. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="content"/> is null. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewTypes.xml" path="doc/members/member[@name='UpdateAtlasTypeDefinitionsAsync(RequestContent,RequestContext)']/*" />
-        public virtual async Task<Response> UpdateAtlasTypeDefinitionsAsync(RequestContent content, RequestContext context = null)
+        /// <param name="typesDef"> A composite object that captures all type definition changes. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual async Task<Response<AtlasTypesDef>> UpdateAtlasTypeDefinitionsAsync(AtlasTypesDef typesDef, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNull(content, nameof(content));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewTypes.UpdateAtlasTypeDefinitions");
+            using var scope = _clientDiagnostics.CreateScope("PurviewTypes.UpdateAtlasTypeDefinitions");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateUpdateAtlasTypeDefinitionsRequest(content, context);
-                return await _pipeline.ProcessMessageAsync(message, context).ConfigureAwait(false);
+                return await RestClient.UpdateAtlasTypeDefinitionsAsync(typesDef, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -963,22 +708,15 @@ namespace Azure.Analytics.Purview.Catalog
         }
 
         /// <summary> Update all types in bulk, changes detected in the type definitions would be persisted. </summary>
-        /// <param name="content"> The content to send as the body of the request. Details of the request body schema are in the Remarks section below. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="content"/> is null. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewTypes.xml" path="doc/members/member[@name='UpdateAtlasTypeDefinitions(RequestContent,RequestContext)']/*" />
-        public virtual Response UpdateAtlasTypeDefinitions(RequestContent content, RequestContext context = null)
+        /// <param name="typesDef"> A composite object that captures all type definition changes. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual Response<AtlasTypesDef> UpdateAtlasTypeDefinitions(AtlasTypesDef typesDef, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNull(content, nameof(content));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewTypes.UpdateAtlasTypeDefinitions");
+            using var scope = _clientDiagnostics.CreateScope("PurviewTypes.UpdateAtlasTypeDefinitions");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateUpdateAtlasTypeDefinitionsRequest(content, context);
-                return _pipeline.ProcessMessage(message, context);
+                return RestClient.UpdateAtlasTypeDefinitions(typesDef, cancellationToken);
             }
             catch (Exception e)
             {
@@ -988,22 +726,15 @@ namespace Azure.Analytics.Purview.Catalog
         }
 
         /// <summary> Delete API for all types in bulk. </summary>
-        /// <param name="content"> The content to send as the body of the request. Details of the request body schema are in the Remarks section below. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="content"/> is null. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. </returns>
-        /// <include file="Docs/PurviewTypes.xml" path="doc/members/member[@name='DeleteTypeDefinitionsAsync(RequestContent,RequestContext)']/*" />
-        public virtual async Task<Response> DeleteTypeDefinitionsAsync(RequestContent content, RequestContext context = null)
+        /// <param name="typesDef"> A composite object that captures all types to be deleted. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual async Task<Response> DeleteTypeDefinitionsAsync(AtlasTypesDef typesDef, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNull(content, nameof(content));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewTypes.DeleteTypeDefinitions");
+            using var scope = _clientDiagnostics.CreateScope("PurviewTypes.DeleteTypeDefinitions");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateDeleteTypeDefinitionsRequest(content, context);
-                return await _pipeline.ProcessMessageAsync(message, context).ConfigureAwait(false);
+                return await RestClient.DeleteTypeDefinitionsAsync(typesDef, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -1013,22 +744,15 @@ namespace Azure.Analytics.Purview.Catalog
         }
 
         /// <summary> Delete API for all types in bulk. </summary>
-        /// <param name="content"> The content to send as the body of the request. Details of the request body schema are in the Remarks section below. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="content"/> is null. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. </returns>
-        /// <include file="Docs/PurviewTypes.xml" path="doc/members/member[@name='DeleteTypeDefinitions(RequestContent,RequestContext)']/*" />
-        public virtual Response DeleteTypeDefinitions(RequestContent content, RequestContext context = null)
+        /// <param name="typesDef"> A composite object that captures all types to be deleted. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual Response DeleteTypeDefinitions(AtlasTypesDef typesDef, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNull(content, nameof(content));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewTypes.DeleteTypeDefinitions");
+            using var scope = _clientDiagnostics.CreateScope("PurviewTypes.DeleteTypeDefinitions");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateDeleteTypeDefinitionsRequest(content, context);
-                return _pipeline.ProcessMessage(message, context);
+                return RestClient.DeleteTypeDefinitions(typesDef, cancellationToken);
             }
             catch (Exception e)
             {
@@ -1042,19 +766,15 @@ namespace Azure.Analytics.Purview.Catalog
         /// Whether include termtemplatedef when return all typedefs.
         /// This is always true when search filter type=term_template
         /// </param>
-        /// <param name="type"> Typedef name as search filter when get typedefs. Allowed values: &quot;enum&quot; | &quot;entity&quot; | &quot;classification&quot; | &quot;relationship&quot; | &quot;struct&quot; | &quot;term_template&quot;. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewTypes.xml" path="doc/members/member[@name='GetTypeDefinitionHeadersAsync(Boolean,String,RequestContext)']/*" />
-        public virtual async Task<Response> GetTypeDefinitionHeadersAsync(bool? includeTermTemplate = null, string type = null, RequestContext context = null)
+        /// <param name="type"> Typedef name as search filter when get typedefs. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual async Task<Response<IReadOnlyList<AtlasTypeDefHeader>>> GetTypeDefinitionHeadersAsync(bool? includeTermTemplate = null, Models.Type? type = null, CancellationToken cancellationToken = default)
         {
-            using var scope = ClientDiagnostics.CreateScope("PurviewTypes.GetTypeDefinitionHeaders");
+            using var scope = _clientDiagnostics.CreateScope("PurviewTypes.GetTypeDefinitionHeaders");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateGetTypeDefinitionHeadersRequest(includeTermTemplate, type, context);
-                return await _pipeline.ProcessMessageAsync(message, context).ConfigureAwait(false);
+                return await RestClient.GetTypeDefinitionHeadersAsync(includeTermTemplate, type, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -1068,19 +788,15 @@ namespace Azure.Analytics.Purview.Catalog
         /// Whether include termtemplatedef when return all typedefs.
         /// This is always true when search filter type=term_template
         /// </param>
-        /// <param name="type"> Typedef name as search filter when get typedefs. Allowed values: &quot;enum&quot; | &quot;entity&quot; | &quot;classification&quot; | &quot;relationship&quot; | &quot;struct&quot; | &quot;term_template&quot;. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewTypes.xml" path="doc/members/member[@name='GetTypeDefinitionHeaders(Boolean,String,RequestContext)']/*" />
-        public virtual Response GetTypeDefinitionHeaders(bool? includeTermTemplate = null, string type = null, RequestContext context = null)
+        /// <param name="type"> Typedef name as search filter when get typedefs. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual Response<IReadOnlyList<AtlasTypeDefHeader>> GetTypeDefinitionHeaders(bool? includeTermTemplate = null, Models.Type? type = null, CancellationToken cancellationToken = default)
         {
-            using var scope = ClientDiagnostics.CreateScope("PurviewTypes.GetTypeDefinitionHeaders");
+            using var scope = _clientDiagnostics.CreateScope("PurviewTypes.GetTypeDefinitionHeaders");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateGetTypeDefinitionHeadersRequest(includeTermTemplate, type, context);
-                return _pipeline.ProcessMessage(message, context);
+                return RestClient.GetTypeDefinitionHeaders(includeTermTemplate, type, cancellationToken);
             }
             catch (Exception e)
             {
@@ -1091,22 +807,14 @@ namespace Azure.Analytics.Purview.Catalog
 
         /// <summary> Get the term template definition for the given GUID. </summary>
         /// <param name="guid"> The globally unique identifier of the term template. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="guid"/> is null. </exception>
-        /// <exception cref="ArgumentException"> <paramref name="guid"/> is an empty string, and was expected to be non-empty. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewTypes.xml" path="doc/members/member[@name='GetTermTemplateDefByGuidAsync(String,RequestContext)']/*" />
-        public virtual async Task<Response> GetTermTemplateDefByGuidAsync(string guid, RequestContext context = null)
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual async Task<Response<TermTemplateDef>> GetTermTemplateDefByGuidAsync(string guid, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNullOrEmpty(guid, nameof(guid));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewTypes.GetTermTemplateDefByGuid");
+            using var scope = _clientDiagnostics.CreateScope("PurviewTypes.GetTermTemplateDefByGuid");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateGetTermTemplateDefByGuidRequest(guid, context);
-                return await _pipeline.ProcessMessageAsync(message, context).ConfigureAwait(false);
+                return await RestClient.GetTermTemplateDefByGuidAsync(guid, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -1117,22 +825,14 @@ namespace Azure.Analytics.Purview.Catalog
 
         /// <summary> Get the term template definition for the given GUID. </summary>
         /// <param name="guid"> The globally unique identifier of the term template. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="guid"/> is null. </exception>
-        /// <exception cref="ArgumentException"> <paramref name="guid"/> is an empty string, and was expected to be non-empty. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewTypes.xml" path="doc/members/member[@name='GetTermTemplateDefByGuid(String,RequestContext)']/*" />
-        public virtual Response GetTermTemplateDefByGuid(string guid, RequestContext context = null)
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual Response<TermTemplateDef> GetTermTemplateDefByGuid(string guid, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNullOrEmpty(guid, nameof(guid));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewTypes.GetTermTemplateDefByGuid");
+            using var scope = _clientDiagnostics.CreateScope("PurviewTypes.GetTermTemplateDefByGuid");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateGetTermTemplateDefByGuidRequest(guid, context);
-                return _pipeline.ProcessMessage(message, context);
+                return RestClient.GetTermTemplateDefByGuid(guid, cancellationToken);
             }
             catch (Exception e)
             {
@@ -1143,22 +843,14 @@ namespace Azure.Analytics.Purview.Catalog
 
         /// <summary> Get the term template definition by its name (unique). </summary>
         /// <param name="name"> The name of the term template. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="name"/> is null. </exception>
-        /// <exception cref="ArgumentException"> <paramref name="name"/> is an empty string, and was expected to be non-empty. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewTypes.xml" path="doc/members/member[@name='GetTermTemplateDefByNameAsync(String,RequestContext)']/*" />
-        public virtual async Task<Response> GetTermTemplateDefByNameAsync(string name, RequestContext context = null)
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual async Task<Response<TermTemplateDef>> GetTermTemplateDefByNameAsync(string name, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNullOrEmpty(name, nameof(name));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewTypes.GetTermTemplateDefByName");
+            using var scope = _clientDiagnostics.CreateScope("PurviewTypes.GetTermTemplateDefByName");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateGetTermTemplateDefByNameRequest(name, context);
-                return await _pipeline.ProcessMessageAsync(message, context).ConfigureAwait(false);
+                return await RestClient.GetTermTemplateDefByNameAsync(name, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -1169,22 +861,14 @@ namespace Azure.Analytics.Purview.Catalog
 
         /// <summary> Get the term template definition by its name (unique). </summary>
         /// <param name="name"> The name of the term template. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="name"/> is null. </exception>
-        /// <exception cref="ArgumentException"> <paramref name="name"/> is an empty string, and was expected to be non-empty. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewTypes.xml" path="doc/members/member[@name='GetTermTemplateDefByName(String,RequestContext)']/*" />
-        public virtual Response GetTermTemplateDefByName(string name, RequestContext context = null)
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual Response<TermTemplateDef> GetTermTemplateDefByName(string name, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNullOrEmpty(name, nameof(name));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewTypes.GetTermTemplateDefByName");
+            using var scope = _clientDiagnostics.CreateScope("PurviewTypes.GetTermTemplateDefByName");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateGetTermTemplateDefByNameRequest(name, context);
-                return _pipeline.ProcessMessage(message, context);
+                return RestClient.GetTermTemplateDefByName(name, cancellationToken);
             }
             catch (Exception e)
             {
@@ -1192,359 +876,5 @@ namespace Azure.Analytics.Purview.Catalog
                 throw;
             }
         }
-
-        internal HttpMessage CreateGetBusinessMetadataDefByGuidRequest(string guid, RequestContext context)
-        {
-            var message = _pipeline.CreateMessage(context, ResponseClassifier200);
-            var request = message.Request;
-            request.Method = RequestMethod.Get;
-            var uri = new RawRequestUriBuilder();
-            uri.Reset(_endpoint);
-            uri.AppendRaw("/catalog/api", false);
-            uri.AppendPath("/atlas/v2/types/businessmetadatadef/guid/", false);
-            uri.AppendPath(guid, true);
-            request.Uri = uri;
-            request.Headers.Add("Accept", "application/json");
-            return message;
-        }
-
-        internal HttpMessage CreateGetBusinessMetadataDefByNameRequest(string name, RequestContext context)
-        {
-            var message = _pipeline.CreateMessage(context, ResponseClassifier200);
-            var request = message.Request;
-            request.Method = RequestMethod.Get;
-            var uri = new RawRequestUriBuilder();
-            uri.Reset(_endpoint);
-            uri.AppendRaw("/catalog/api", false);
-            uri.AppendPath("/atlas/v2/types/businessmetadatadef/name/", false);
-            uri.AppendPath(name, true);
-            request.Uri = uri;
-            request.Headers.Add("Accept", "application/json");
-            return message;
-        }
-
-        internal HttpMessage CreateGetClassificationDefByGuidRequest(string guid, RequestContext context)
-        {
-            var message = _pipeline.CreateMessage(context, ResponseClassifier200);
-            var request = message.Request;
-            request.Method = RequestMethod.Get;
-            var uri = new RawRequestUriBuilder();
-            uri.Reset(_endpoint);
-            uri.AppendRaw("/catalog/api", false);
-            uri.AppendPath("/atlas/v2/types/classificationdef/guid/", false);
-            uri.AppendPath(guid, true);
-            request.Uri = uri;
-            request.Headers.Add("Accept", "application/json");
-            return message;
-        }
-
-        internal HttpMessage CreateGetClassificationDefByNameRequest(string name, RequestContext context)
-        {
-            var message = _pipeline.CreateMessage(context, ResponseClassifier200);
-            var request = message.Request;
-            request.Method = RequestMethod.Get;
-            var uri = new RawRequestUriBuilder();
-            uri.Reset(_endpoint);
-            uri.AppendRaw("/catalog/api", false);
-            uri.AppendPath("/atlas/v2/types/classificationdef/name/", false);
-            uri.AppendPath(name, true);
-            request.Uri = uri;
-            request.Headers.Add("Accept", "application/json");
-            return message;
-        }
-
-        internal HttpMessage CreateGetEntityDefinitionByGuidRequest(string guid, RequestContext context)
-        {
-            var message = _pipeline.CreateMessage(context, ResponseClassifier200);
-            var request = message.Request;
-            request.Method = RequestMethod.Get;
-            var uri = new RawRequestUriBuilder();
-            uri.Reset(_endpoint);
-            uri.AppendRaw("/catalog/api", false);
-            uri.AppendPath("/atlas/v2/types/entitydef/guid/", false);
-            uri.AppendPath(guid, true);
-            request.Uri = uri;
-            request.Headers.Add("Accept", "application/json");
-            return message;
-        }
-
-        internal HttpMessage CreateGetEntityDefinitionByNameRequest(string name, RequestContext context)
-        {
-            var message = _pipeline.CreateMessage(context, ResponseClassifier200);
-            var request = message.Request;
-            request.Method = RequestMethod.Get;
-            var uri = new RawRequestUriBuilder();
-            uri.Reset(_endpoint);
-            uri.AppendRaw("/catalog/api", false);
-            uri.AppendPath("/atlas/v2/types/entitydef/name/", false);
-            uri.AppendPath(name, true);
-            request.Uri = uri;
-            request.Headers.Add("Accept", "application/json");
-            return message;
-        }
-
-        internal HttpMessage CreateGetEnumDefByGuidRequest(string guid, RequestContext context)
-        {
-            var message = _pipeline.CreateMessage(context, ResponseClassifier200);
-            var request = message.Request;
-            request.Method = RequestMethod.Get;
-            var uri = new RawRequestUriBuilder();
-            uri.Reset(_endpoint);
-            uri.AppendRaw("/catalog/api", false);
-            uri.AppendPath("/atlas/v2/types/enumdef/guid/", false);
-            uri.AppendPath(guid, true);
-            request.Uri = uri;
-            request.Headers.Add("Accept", "application/json");
-            return message;
-        }
-
-        internal HttpMessage CreateGetEnumDefByNameRequest(string name, RequestContext context)
-        {
-            var message = _pipeline.CreateMessage(context, ResponseClassifier200);
-            var request = message.Request;
-            request.Method = RequestMethod.Get;
-            var uri = new RawRequestUriBuilder();
-            uri.Reset(_endpoint);
-            uri.AppendRaw("/catalog/api", false);
-            uri.AppendPath("/atlas/v2/types/enumdef/name/", false);
-            uri.AppendPath(name, true);
-            request.Uri = uri;
-            request.Headers.Add("Accept", "application/json");
-            return message;
-        }
-
-        internal HttpMessage CreateGetRelationshipDefByGuidRequest(string guid, RequestContext context)
-        {
-            var message = _pipeline.CreateMessage(context, ResponseClassifier200);
-            var request = message.Request;
-            request.Method = RequestMethod.Get;
-            var uri = new RawRequestUriBuilder();
-            uri.Reset(_endpoint);
-            uri.AppendRaw("/catalog/api", false);
-            uri.AppendPath("/atlas/v2/types/relationshipdef/guid/", false);
-            uri.AppendPath(guid, true);
-            request.Uri = uri;
-            request.Headers.Add("Accept", "application/json");
-            return message;
-        }
-
-        internal HttpMessage CreateGetRelationshipDefByNameRequest(string name, RequestContext context)
-        {
-            var message = _pipeline.CreateMessage(context, ResponseClassifier200);
-            var request = message.Request;
-            request.Method = RequestMethod.Get;
-            var uri = new RawRequestUriBuilder();
-            uri.Reset(_endpoint);
-            uri.AppendRaw("/catalog/api", false);
-            uri.AppendPath("/atlas/v2/types/relationshipdef/name/", false);
-            uri.AppendPath(name, true);
-            request.Uri = uri;
-            request.Headers.Add("Accept", "application/json");
-            return message;
-        }
-
-        internal HttpMessage CreateGetStructDefByGuidRequest(string guid, RequestContext context)
-        {
-            var message = _pipeline.CreateMessage(context, ResponseClassifier200);
-            var request = message.Request;
-            request.Method = RequestMethod.Get;
-            var uri = new RawRequestUriBuilder();
-            uri.Reset(_endpoint);
-            uri.AppendRaw("/catalog/api", false);
-            uri.AppendPath("/atlas/v2/types/structdef/guid/", false);
-            uri.AppendPath(guid, true);
-            request.Uri = uri;
-            request.Headers.Add("Accept", "application/json");
-            return message;
-        }
-
-        internal HttpMessage CreateGetStructDefByNameRequest(string name, RequestContext context)
-        {
-            var message = _pipeline.CreateMessage(context, ResponseClassifier200);
-            var request = message.Request;
-            request.Method = RequestMethod.Get;
-            var uri = new RawRequestUriBuilder();
-            uri.Reset(_endpoint);
-            uri.AppendRaw("/catalog/api", false);
-            uri.AppendPath("/atlas/v2/types/structdef/name/", false);
-            uri.AppendPath(name, true);
-            request.Uri = uri;
-            request.Headers.Add("Accept", "application/json");
-            return message;
-        }
-
-        internal HttpMessage CreateGetTypeDefinitionByGuidRequest(string guid, RequestContext context)
-        {
-            var message = _pipeline.CreateMessage(context, ResponseClassifier200);
-            var request = message.Request;
-            request.Method = RequestMethod.Get;
-            var uri = new RawRequestUriBuilder();
-            uri.Reset(_endpoint);
-            uri.AppendRaw("/catalog/api", false);
-            uri.AppendPath("/atlas/v2/types/typedef/guid/", false);
-            uri.AppendPath(guid, true);
-            request.Uri = uri;
-            request.Headers.Add("Accept", "application/json");
-            return message;
-        }
-
-        internal HttpMessage CreateGetTypeDefinitionByNameRequest(string name, RequestContext context)
-        {
-            var message = _pipeline.CreateMessage(context, ResponseClassifier200);
-            var request = message.Request;
-            request.Method = RequestMethod.Get;
-            var uri = new RawRequestUriBuilder();
-            uri.Reset(_endpoint);
-            uri.AppendRaw("/catalog/api", false);
-            uri.AppendPath("/atlas/v2/types/typedef/name/", false);
-            uri.AppendPath(name, true);
-            request.Uri = uri;
-            request.Headers.Add("Accept", "application/json");
-            return message;
-        }
-
-        internal HttpMessage CreateDeleteTypeByNameRequest(string name, RequestContext context)
-        {
-            var message = _pipeline.CreateMessage(context, ResponseClassifier204);
-            var request = message.Request;
-            request.Method = RequestMethod.Delete;
-            var uri = new RawRequestUriBuilder();
-            uri.Reset(_endpoint);
-            uri.AppendRaw("/catalog/api", false);
-            uri.AppendPath("/atlas/v2/types/typedef/name/", false);
-            uri.AppendPath(name, true);
-            request.Uri = uri;
-            request.Headers.Add("Accept", "application/json");
-            return message;
-        }
-
-        internal HttpMessage CreateGetAllTypeDefinitionsRequest(bool? includeTermTemplate, string type, RequestContext context)
-        {
-            var message = _pipeline.CreateMessage(context, ResponseClassifier200);
-            var request = message.Request;
-            request.Method = RequestMethod.Get;
-            var uri = new RawRequestUriBuilder();
-            uri.Reset(_endpoint);
-            uri.AppendRaw("/catalog/api", false);
-            uri.AppendPath("/atlas/v2/types/typedefs", false);
-            if (includeTermTemplate != null)
-            {
-                uri.AppendQuery("includeTermTemplate", includeTermTemplate.Value, true);
-            }
-            if (type != null)
-            {
-                uri.AppendQuery("type", type, true);
-            }
-            request.Uri = uri;
-            request.Headers.Add("Accept", "application/json");
-            return message;
-        }
-
-        internal HttpMessage CreateCreateTypeDefinitionsRequest(RequestContent content, RequestContext context)
-        {
-            var message = _pipeline.CreateMessage(context, ResponseClassifier200);
-            var request = message.Request;
-            request.Method = RequestMethod.Post;
-            var uri = new RawRequestUriBuilder();
-            uri.Reset(_endpoint);
-            uri.AppendRaw("/catalog/api", false);
-            uri.AppendPath("/atlas/v2/types/typedefs", false);
-            request.Uri = uri;
-            request.Headers.Add("Accept", "application/json");
-            request.Headers.Add("Content-Type", "application/json");
-            request.Content = content;
-            return message;
-        }
-
-        internal HttpMessage CreateUpdateAtlasTypeDefinitionsRequest(RequestContent content, RequestContext context)
-        {
-            var message = _pipeline.CreateMessage(context, ResponseClassifier200);
-            var request = message.Request;
-            request.Method = RequestMethod.Put;
-            var uri = new RawRequestUriBuilder();
-            uri.Reset(_endpoint);
-            uri.AppendRaw("/catalog/api", false);
-            uri.AppendPath("/atlas/v2/types/typedefs", false);
-            request.Uri = uri;
-            request.Headers.Add("Accept", "application/json");
-            request.Headers.Add("Content-Type", "application/json");
-            request.Content = content;
-            return message;
-        }
-
-        internal HttpMessage CreateDeleteTypeDefinitionsRequest(RequestContent content, RequestContext context)
-        {
-            var message = _pipeline.CreateMessage(context, ResponseClassifier204);
-            var request = message.Request;
-            request.Method = RequestMethod.Delete;
-            var uri = new RawRequestUriBuilder();
-            uri.Reset(_endpoint);
-            uri.AppendRaw("/catalog/api", false);
-            uri.AppendPath("/atlas/v2/types/typedefs", false);
-            request.Uri = uri;
-            request.Headers.Add("Accept", "application/json");
-            request.Headers.Add("Content-Type", "application/json");
-            request.Content = content;
-            return message;
-        }
-
-        internal HttpMessage CreateGetTypeDefinitionHeadersRequest(bool? includeTermTemplate, string type, RequestContext context)
-        {
-            var message = _pipeline.CreateMessage(context, ResponseClassifier200);
-            var request = message.Request;
-            request.Method = RequestMethod.Get;
-            var uri = new RawRequestUriBuilder();
-            uri.Reset(_endpoint);
-            uri.AppendRaw("/catalog/api", false);
-            uri.AppendPath("/atlas/v2/types/typedefs/headers", false);
-            if (includeTermTemplate != null)
-            {
-                uri.AppendQuery("includeTermTemplate", includeTermTemplate.Value, true);
-            }
-            if (type != null)
-            {
-                uri.AppendQuery("type", type, true);
-            }
-            request.Uri = uri;
-            request.Headers.Add("Accept", "application/json");
-            return message;
-        }
-
-        internal HttpMessage CreateGetTermTemplateDefByGuidRequest(string guid, RequestContext context)
-        {
-            var message = _pipeline.CreateMessage(context, ResponseClassifier200);
-            var request = message.Request;
-            request.Method = RequestMethod.Get;
-            var uri = new RawRequestUriBuilder();
-            uri.Reset(_endpoint);
-            uri.AppendRaw("/catalog/api", false);
-            uri.AppendPath("/types/termtemplatedef/guid/", false);
-            uri.AppendPath(guid, true);
-            uri.AppendQuery("api-version", _apiVersion, true);
-            request.Uri = uri;
-            request.Headers.Add("Accept", "application/json");
-            return message;
-        }
-
-        internal HttpMessage CreateGetTermTemplateDefByNameRequest(string name, RequestContext context)
-        {
-            var message = _pipeline.CreateMessage(context, ResponseClassifier200);
-            var request = message.Request;
-            request.Method = RequestMethod.Get;
-            var uri = new RawRequestUriBuilder();
-            uri.Reset(_endpoint);
-            uri.AppendRaw("/catalog/api", false);
-            uri.AppendPath("/types/termtemplatedef/name/", false);
-            uri.AppendPath(name, true);
-            uri.AppendQuery("api-version", _apiVersion, true);
-            request.Uri = uri;
-            request.Headers.Add("Accept", "application/json");
-            return message;
-        }
-
-        private static ResponseClassifier _responseClassifier200;
-        private static ResponseClassifier ResponseClassifier200 => _responseClassifier200 ??= new StatusCodeClassifier(stackalloc ushort[] { 200 });
-        private static ResponseClassifier _responseClassifier204;
-        private static ResponseClassifier ResponseClassifier204 => _responseClassifier204 ??= new StatusCodeClassifier(stackalloc ushort[] { 204 });
     }
 }

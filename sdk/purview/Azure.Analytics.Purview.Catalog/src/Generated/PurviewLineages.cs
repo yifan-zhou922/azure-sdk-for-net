@@ -6,28 +6,21 @@
 #nullable disable
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Azure;
+using Azure.Analytics.Purview.Catalog.Models;
 using Azure.Core;
 using Azure.Core.Pipeline;
 
 namespace Azure.Analytics.Purview.Catalog
 {
-    // Data plane generated sub-client.
-    /// <summary> The PurviewLineages sub-client. </summary>
+    /// <summary> The PurviewLineages service client. </summary>
     public partial class PurviewLineages
     {
-        private static readonly string[] AuthorizationScopes = new string[] { "https://purview.azure.net/.default" };
-        private readonly TokenCredential _tokenCredential;
+        private readonly ClientDiagnostics _clientDiagnostics;
         private readonly HttpPipeline _pipeline;
-        private readonly Uri _endpoint;
-        private readonly string _apiVersion;
-
-        /// <summary> The ClientDiagnostics is used to provide tracing support for the client library. </summary>
-        internal ClientDiagnostics ClientDiagnostics { get; }
-
-        /// <summary> The HTTP pipeline for sending and receiving REST requests and responses. </summary>
-        public virtual HttpPipeline Pipeline => _pipeline;
+        internal PurviewLineagesRestClient RestClient { get; }
 
         /// <summary> Initializes a new instance of PurviewLineages for mocking. </summary>
         protected PurviewLineages()
@@ -35,44 +28,55 @@ namespace Azure.Analytics.Purview.Catalog
         }
 
         /// <summary> Initializes a new instance of PurviewLineages. </summary>
+        /// <param name="endpoint"> The catalog endpoint of your Purview account. Example: https://{accountName}.purview.azure.com. </param>
+        /// <param name="credential"> A credential used to authenticate to an Azure Service. </param>
+        /// <param name="options"> The options for configuring the client. </param>
+        public PurviewLineages(Uri endpoint, TokenCredential credential, PurviewCatalogServiceRestAPIDocumentClientOptions options = null)
+        {
+            if (endpoint == null)
+            {
+                throw new ArgumentNullException(nameof(endpoint));
+            }
+            if (credential == null)
+            {
+                throw new ArgumentNullException(nameof(credential));
+            }
+
+            options ??= new PurviewCatalogServiceRestAPIDocumentClientOptions();
+            _clientDiagnostics = new ClientDiagnostics(options);
+            string[] scopes = { "https://purview.azure.net/.default" };
+            _pipeline = HttpPipelineBuilder.Build(options, new BearerTokenAuthenticationPolicy(credential, scopes));
+            RestClient = new PurviewLineagesRestClient(_clientDiagnostics, _pipeline, endpoint, options.Version);
+        }
+
+        /// <summary> Initializes a new instance of PurviewLineages. </summary>
         /// <param name="clientDiagnostics"> The handler for diagnostic messaging in the client. </param>
         /// <param name="pipeline"> The HTTP pipeline for sending and receiving REST requests and responses. </param>
-        /// <param name="tokenCredential"> The token credential to copy. </param>
         /// <param name="endpoint"> The catalog endpoint of your Purview account. Example: https://{accountName}.purview.azure.com. </param>
         /// <param name="apiVersion"> Api Version. </param>
-        internal PurviewLineages(ClientDiagnostics clientDiagnostics, HttpPipeline pipeline, TokenCredential tokenCredential, Uri endpoint, string apiVersion)
+        /// <exception cref="ArgumentNullException"> <paramref name="clientDiagnostics"/>, <paramref name="pipeline"/>, <paramref name="endpoint"/> or <paramref name="apiVersion"/> is null. </exception>
+        internal PurviewLineages(ClientDiagnostics clientDiagnostics, HttpPipeline pipeline, Uri endpoint, string apiVersion = "2022-03-01-preview")
         {
-            ClientDiagnostics = clientDiagnostics;
+            RestClient = new PurviewLineagesRestClient(clientDiagnostics, pipeline, endpoint, apiVersion);
+            _clientDiagnostics = clientDiagnostics;
             _pipeline = pipeline;
-            _tokenCredential = tokenCredential;
-            _endpoint = endpoint;
-            _apiVersion = apiVersion;
         }
 
         /// <summary> Get lineage info of the entity specified by GUID. </summary>
         /// <param name="guid"> The globally unique identifier of the entity. </param>
-        /// <param name="direction"> The direction of the lineage, which could be INPUT, OUTPUT or BOTH. Allowed values: &quot;BOTH&quot; | &quot;INPUT&quot; | &quot;OUTPUT&quot;. </param>
+        /// <param name="direction"> The direction of the lineage, which could be INPUT, OUTPUT or BOTH. </param>
         /// <param name="depth"> The number of hops for lineage. </param>
         /// <param name="width"> The number of max expanding width in lineage. </param>
         /// <param name="includeParent"> True to include the parent chain in the response. </param>
         /// <param name="getDerivedLineage"> True to include derived lineage in the response. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="guid"/> or <paramref name="direction"/> is null. </exception>
-        /// <exception cref="ArgumentException"> <paramref name="guid"/> is an empty string, and was expected to be non-empty. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewLineages.xml" path="doc/members/member[@name='GetLineageGraphAsync(String,String,Int32,Int32,Boolean,Boolean,RequestContext)']/*" />
-        public virtual async Task<Response> GetLineageGraphAsync(string guid, string direction, int? depth = null, int? width = null, bool? includeParent = null, bool? getDerivedLineage = null, RequestContext context = null)
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual async Task<Response<AtlasLineageInfo>> GetLineageGraphAsync(string guid, Direction direction, int? depth = null, int? width = null, bool? includeParent = null, bool? getDerivedLineage = null, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNullOrEmpty(guid, nameof(guid));
-            Argument.AssertNotNull(direction, nameof(direction));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewLineages.GetLineageGraph");
+            using var scope = _clientDiagnostics.CreateScope("PurviewLineages.GetLineageGraph");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateGetLineageGraphRequest(guid, direction, depth, width, includeParent, getDerivedLineage, context);
-                return await _pipeline.ProcessMessageAsync(message, context).ConfigureAwait(false);
+                return await RestClient.GetLineageGraphAsync(guid, direction, depth, width, includeParent, getDerivedLineage, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -83,28 +87,19 @@ namespace Azure.Analytics.Purview.Catalog
 
         /// <summary> Get lineage info of the entity specified by GUID. </summary>
         /// <param name="guid"> The globally unique identifier of the entity. </param>
-        /// <param name="direction"> The direction of the lineage, which could be INPUT, OUTPUT or BOTH. Allowed values: &quot;BOTH&quot; | &quot;INPUT&quot; | &quot;OUTPUT&quot;. </param>
+        /// <param name="direction"> The direction of the lineage, which could be INPUT, OUTPUT or BOTH. </param>
         /// <param name="depth"> The number of hops for lineage. </param>
         /// <param name="width"> The number of max expanding width in lineage. </param>
         /// <param name="includeParent"> True to include the parent chain in the response. </param>
         /// <param name="getDerivedLineage"> True to include derived lineage in the response. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="guid"/> or <paramref name="direction"/> is null. </exception>
-        /// <exception cref="ArgumentException"> <paramref name="guid"/> is an empty string, and was expected to be non-empty. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewLineages.xml" path="doc/members/member[@name='GetLineageGraph(String,String,Int32,Int32,Boolean,Boolean,RequestContext)']/*" />
-        public virtual Response GetLineageGraph(string guid, string direction, int? depth = null, int? width = null, bool? includeParent = null, bool? getDerivedLineage = null, RequestContext context = null)
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual Response<AtlasLineageInfo> GetLineageGraph(string guid, Direction direction, int? depth = null, int? width = null, bool? includeParent = null, bool? getDerivedLineage = null, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNullOrEmpty(guid, nameof(guid));
-            Argument.AssertNotNull(direction, nameof(direction));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewLineages.GetLineageGraph");
+            using var scope = _clientDiagnostics.CreateScope("PurviewLineages.GetLineageGraph");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateGetLineageGraphRequest(guid, direction, depth, width, includeParent, getDerivedLineage, context);
-                return _pipeline.ProcessMessage(message, context);
+                return RestClient.GetLineageGraph(guid, direction, depth, width, includeParent, getDerivedLineage, cancellationToken);
             }
             catch (Exception e)
             {
@@ -115,27 +110,18 @@ namespace Azure.Analytics.Purview.Catalog
 
         /// <summary> Return immediate next page lineage info about entity with pagination. </summary>
         /// <param name="guid"> The globally unique identifier of the entity. </param>
-        /// <param name="direction"> The direction of the lineage, which could be INPUT, OUTPUT or BOTH. Allowed values: &quot;BOTH&quot; | &quot;INPUT&quot; | &quot;OUTPUT&quot;. </param>
+        /// <param name="direction"> The direction of the lineage, which could be INPUT, OUTPUT or BOTH. </param>
         /// <param name="getDerivedLineage"> True to include derived lineage in the response. </param>
         /// <param name="offset"> The offset for pagination purpose. </param>
         /// <param name="limit"> The page size - by default there is no paging. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="guid"/> or <paramref name="direction"/> is null. </exception>
-        /// <exception cref="ArgumentException"> <paramref name="guid"/> is an empty string, and was expected to be non-empty. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewLineages.xml" path="doc/members/member[@name='NextPageLineageAsync(String,String,Boolean,Int32,Int32,RequestContext)']/*" />
-        public virtual async Task<Response> NextPageLineageAsync(string guid, string direction, bool? getDerivedLineage = null, int? offset = null, int? limit = null, RequestContext context = null)
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual async Task<Response<AtlasLineageInfo>> NextPageLineageAsync(string guid, Direction direction, bool? getDerivedLineage = null, int? offset = null, int? limit = null, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNullOrEmpty(guid, nameof(guid));
-            Argument.AssertNotNull(direction, nameof(direction));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewLineages.NextPageLineage");
+            using var scope = _clientDiagnostics.CreateScope("PurviewLineages.NextPageLineage");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateNextPageLineageRequest(guid, direction, getDerivedLineage, offset, limit, context);
-                return await _pipeline.ProcessMessageAsync(message, context).ConfigureAwait(false);
+                return await RestClient.NextPageLineageAsync(guid, direction, getDerivedLineage, offset, limit, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -146,27 +132,18 @@ namespace Azure.Analytics.Purview.Catalog
 
         /// <summary> Return immediate next page lineage info about entity with pagination. </summary>
         /// <param name="guid"> The globally unique identifier of the entity. </param>
-        /// <param name="direction"> The direction of the lineage, which could be INPUT, OUTPUT or BOTH. Allowed values: &quot;BOTH&quot; | &quot;INPUT&quot; | &quot;OUTPUT&quot;. </param>
+        /// <param name="direction"> The direction of the lineage, which could be INPUT, OUTPUT or BOTH. </param>
         /// <param name="getDerivedLineage"> True to include derived lineage in the response. </param>
         /// <param name="offset"> The offset for pagination purpose. </param>
         /// <param name="limit"> The page size - by default there is no paging. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="guid"/> or <paramref name="direction"/> is null. </exception>
-        /// <exception cref="ArgumentException"> <paramref name="guid"/> is an empty string, and was expected to be non-empty. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewLineages.xml" path="doc/members/member[@name='NextPageLineage(String,String,Boolean,Int32,Int32,RequestContext)']/*" />
-        public virtual Response NextPageLineage(string guid, string direction, bool? getDerivedLineage = null, int? offset = null, int? limit = null, RequestContext context = null)
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual Response<AtlasLineageInfo> NextPageLineage(string guid, Direction direction, bool? getDerivedLineage = null, int? offset = null, int? limit = null, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNullOrEmpty(guid, nameof(guid));
-            Argument.AssertNotNull(direction, nameof(direction));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewLineages.NextPageLineage");
+            using var scope = _clientDiagnostics.CreateScope("PurviewLineages.NextPageLineage");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateNextPageLineageRequest(guid, direction, getDerivedLineage, offset, limit, context);
-                return _pipeline.ProcessMessage(message, context);
+                return RestClient.NextPageLineage(guid, direction, getDerivedLineage, offset, limit, cancellationToken);
             }
             catch (Exception e)
             {
@@ -185,28 +162,19 @@ namespace Azure.Analytics.Purview.Catalog
         /// NOTE: The attrName and attrValue should be unique across entities, eg. qualifiedName
         /// </summary>
         /// <param name="typeName"> The name of the type. </param>
-        /// <param name="direction"> The direction of the lineage, which could be INPUT, OUTPUT or BOTH. Allowed values: &quot;BOTH&quot; | &quot;INPUT&quot; | &quot;OUTPUT&quot;. </param>
+        /// <param name="direction"> The direction of the lineage, which could be INPUT, OUTPUT or BOTH. </param>
         /// <param name="depth"> The number of hops for lineage. </param>
         /// <param name="width"> The number of max expanding width in lineage. </param>
         /// <param name="includeParent"> True to include the parent chain in the response. </param>
         /// <param name="getDerivedLineage"> True to include derived lineage in the response. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="typeName"/> or <paramref name="direction"/> is null. </exception>
-        /// <exception cref="ArgumentException"> <paramref name="typeName"/> is an empty string, and was expected to be non-empty. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewLineages.xml" path="doc/members/member[@name='GetLineageByUniqueAttributeAsync(String,String,Int32,Int32,Boolean,Boolean,RequestContext)']/*" />
-        public virtual async Task<Response> GetLineageByUniqueAttributeAsync(string typeName, string direction, int? depth = null, int? width = null, bool? includeParent = null, bool? getDerivedLineage = null, RequestContext context = null)
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual async Task<Response<AtlasLineageInfo>> GetLineageByUniqueAttributeAsync(string typeName, Direction direction, int? depth = null, int? width = null, bool? includeParent = null, bool? getDerivedLineage = null, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNullOrEmpty(typeName, nameof(typeName));
-            Argument.AssertNotNull(direction, nameof(direction));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewLineages.GetLineageByUniqueAttribute");
+            using var scope = _clientDiagnostics.CreateScope("PurviewLineages.GetLineageByUniqueAttribute");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateGetLineageByUniqueAttributeRequest(typeName, direction, depth, width, includeParent, getDerivedLineage, context);
-                return await _pipeline.ProcessMessageAsync(message, context).ConfigureAwait(false);
+                return await RestClient.GetLineageByUniqueAttributeAsync(typeName, direction, depth, width, includeParent, getDerivedLineage, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -225,28 +193,19 @@ namespace Azure.Analytics.Purview.Catalog
         /// NOTE: The attrName and attrValue should be unique across entities, eg. qualifiedName
         /// </summary>
         /// <param name="typeName"> The name of the type. </param>
-        /// <param name="direction"> The direction of the lineage, which could be INPUT, OUTPUT or BOTH. Allowed values: &quot;BOTH&quot; | &quot;INPUT&quot; | &quot;OUTPUT&quot;. </param>
+        /// <param name="direction"> The direction of the lineage, which could be INPUT, OUTPUT or BOTH. </param>
         /// <param name="depth"> The number of hops for lineage. </param>
         /// <param name="width"> The number of max expanding width in lineage. </param>
         /// <param name="includeParent"> True to include the parent chain in the response. </param>
         /// <param name="getDerivedLineage"> True to include derived lineage in the response. </param>
-        /// <param name="context"> The request context, which can override default behaviors of the client pipeline on a per-call basis. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="typeName"/> or <paramref name="direction"/> is null. </exception>
-        /// <exception cref="ArgumentException"> <paramref name="typeName"/> is an empty string, and was expected to be non-empty. </exception>
-        /// <exception cref="RequestFailedException"> Service returned a non-success status code. </exception>
-        /// <returns> The response returned from the service. Details of the response body schema are in the Remarks section below. </returns>
-        /// <include file="Docs/PurviewLineages.xml" path="doc/members/member[@name='GetLineageByUniqueAttribute(String,String,Int32,Int32,Boolean,Boolean,RequestContext)']/*" />
-        public virtual Response GetLineageByUniqueAttribute(string typeName, string direction, int? depth = null, int? width = null, bool? includeParent = null, bool? getDerivedLineage = null, RequestContext context = null)
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual Response<AtlasLineageInfo> GetLineageByUniqueAttribute(string typeName, Direction direction, int? depth = null, int? width = null, bool? includeParent = null, bool? getDerivedLineage = null, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNullOrEmpty(typeName, nameof(typeName));
-            Argument.AssertNotNull(direction, nameof(direction));
-
-            using var scope = ClientDiagnostics.CreateScope("PurviewLineages.GetLineageByUniqueAttribute");
+            using var scope = _clientDiagnostics.CreateScope("PurviewLineages.GetLineageByUniqueAttribute");
             scope.Start();
             try
             {
-                using HttpMessage message = CreateGetLineageByUniqueAttributeRequest(typeName, direction, depth, width, includeParent, getDerivedLineage, context);
-                return _pipeline.ProcessMessage(message, context);
+                return RestClient.GetLineageByUniqueAttribute(typeName, direction, depth, width, includeParent, getDerivedLineage, cancellationToken);
             }
             catch (Exception e)
             {
@@ -254,102 +213,5 @@ namespace Azure.Analytics.Purview.Catalog
                 throw;
             }
         }
-
-        internal HttpMessage CreateGetLineageGraphRequest(string guid, string direction, int? depth, int? width, bool? includeParent, bool? getDerivedLineage, RequestContext context)
-        {
-            var message = _pipeline.CreateMessage(context, ResponseClassifier200);
-            var request = message.Request;
-            request.Method = RequestMethod.Get;
-            var uri = new RawRequestUriBuilder();
-            uri.Reset(_endpoint);
-            uri.AppendRaw("/catalog/api", false);
-            uri.AppendPath("/atlas/v2/lineage/", false);
-            uri.AppendPath(guid, true);
-            uri.AppendQuery("direction", direction, true);
-            if (depth != null)
-            {
-                uri.AppendQuery("depth", depth.Value, true);
-            }
-            if (width != null)
-            {
-                uri.AppendQuery("width", width.Value, true);
-            }
-            if (includeParent != null)
-            {
-                uri.AppendQuery("includeParent", includeParent.Value, true);
-            }
-            if (getDerivedLineage != null)
-            {
-                uri.AppendQuery("getDerivedLineage", getDerivedLineage.Value, true);
-            }
-            request.Uri = uri;
-            request.Headers.Add("Accept", "application/json");
-            return message;
-        }
-
-        internal HttpMessage CreateNextPageLineageRequest(string guid, string direction, bool? getDerivedLineage, int? offset, int? limit, RequestContext context)
-        {
-            var message = _pipeline.CreateMessage(context, ResponseClassifier200);
-            var request = message.Request;
-            request.Method = RequestMethod.Get;
-            var uri = new RawRequestUriBuilder();
-            uri.Reset(_endpoint);
-            uri.AppendRaw("/catalog/api", false);
-            uri.AppendPath("/lineage/", false);
-            uri.AppendPath(guid, true);
-            uri.AppendPath("/next/", false);
-            uri.AppendQuery("direction", direction, true);
-            if (getDerivedLineage != null)
-            {
-                uri.AppendQuery("getDerivedLineage", getDerivedLineage.Value, true);
-            }
-            if (offset != null)
-            {
-                uri.AppendQuery("offset", offset.Value, true);
-            }
-            if (limit != null)
-            {
-                uri.AppendQuery("limit", limit.Value, true);
-            }
-            uri.AppendQuery("api-version", _apiVersion, true);
-            request.Uri = uri;
-            request.Headers.Add("Accept", "application/json");
-            return message;
-        }
-
-        internal HttpMessage CreateGetLineageByUniqueAttributeRequest(string typeName, string direction, int? depth, int? width, bool? includeParent, bool? getDerivedLineage, RequestContext context)
-        {
-            var message = _pipeline.CreateMessage(context, ResponseClassifier200);
-            var request = message.Request;
-            request.Method = RequestMethod.Get;
-            var uri = new RawRequestUriBuilder();
-            uri.Reset(_endpoint);
-            uri.AppendRaw("/catalog/api", false);
-            uri.AppendPath("/atlas/v2/lineage/uniqueAttribute/type/", false);
-            uri.AppendPath(typeName, true);
-            uri.AppendQuery("direction", direction, true);
-            if (depth != null)
-            {
-                uri.AppendQuery("depth", depth.Value, true);
-            }
-            if (width != null)
-            {
-                uri.AppendQuery("width", width.Value, true);
-            }
-            if (includeParent != null)
-            {
-                uri.AppendQuery("includeParent", includeParent.Value, true);
-            }
-            if (getDerivedLineage != null)
-            {
-                uri.AppendQuery("getDerivedLineage", getDerivedLineage.Value, true);
-            }
-            request.Uri = uri;
-            request.Headers.Add("Accept", "application/json");
-            return message;
-        }
-
-        private static ResponseClassifier _responseClassifier200;
-        private static ResponseClassifier ResponseClassifier200 => _responseClassifier200 ??= new StatusCodeClassifier(stackalloc ushort[] { 200 });
     }
 }
